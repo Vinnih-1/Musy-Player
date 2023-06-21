@@ -1,6 +1,6 @@
 import { styled } from 'styled-components/native'
 
-export const Footer = styled.View`
+export const Footer = styled.TouchableOpacity`
     flex: 1;
     flex-direction: row;
     max-height: 10%;

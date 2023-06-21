@@ -20,7 +20,6 @@ export const PlayerInformation = styled.View`
 export const MusicImage = styled.View`
     height: 40px;
     width: 40px;
-    background-color: gray;
     margin-left: 5%;
 `
 

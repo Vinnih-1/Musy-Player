@@ -12,7 +12,7 @@ import {
     Progress 
 } from './styles'
 
-import { TouchableOpacity } from 'react-native'
+import { TouchableOpacity, Image } from 'react-native'
 
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5'
@@ -21,7 +21,9 @@ export function FooterBar() {
     return(
         <Footer>
             <PlayerInformation>
-                <MusicImage></MusicImage>
+                <MusicImage>
+                    <Image style={{maxWidth: 40, maxHeight: 40}} source={require('../../assets/music-icon.png')}/>
+                </MusicImage>
                 <MusicTitleView>
                     <MusicTitleText>Nakhla</MusicTitleText>
                     <MusicArtistText>Hidden & Khalse & Sijal</MusicArtistText>

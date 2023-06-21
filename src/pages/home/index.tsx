@@ -1,19 +1,20 @@
 import { TrackProps, TrackerContext } from '../../contexts/track/TrackerContext'
 import React, { useContext, useEffect, useState } from 'react'
 import { NavigationBar } from '../../components/navigator'
-import { Background, MusicList } from './styles'
+import { ScrollView, Text, View } from 'react-native'
 import { FooterBar } from '../../components/footer'
 import { MusicCard } from '../../components/card'
-import { ScrollView, Text, View } from 'react-native'
+import { Background, MusicList } from './styles'
 
 export function Home() {
     const trackContext = useContext(TrackerContext);
     const [tracks, setTracks] = useState<TrackProps[]>([]);
 
     useEffect(() => {
-        if (!trackContext) return;
-        setTracks(trackContext.tracks);
-    });
+        if (trackContext) {
+            setTracks(trackContext.tracks);
+        }
+    }, [trackContext]);
 
     return (
         <Background>
@@ -35,7 +36,7 @@ export function Home() {
                 )}
             </MusicList>
 
-            <FooterBar title='' artist='' />
+            <FooterBar />
         </Background>
     )
 }

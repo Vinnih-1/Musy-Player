@@ -25,13 +25,13 @@ export function TrackerProvider(props: TrackerProviderProps) {
     const [tracks, setTrack] = useState<TrackProps[]>([]);
 
     useEffect(() => {
-        console.log('Iniciando o escaneamento das músicas no diretório padrão...')
+        console.log('Starting the scan of the songs in the default directory...')
 
         RNFS.readDir(RNFS.ExternalStorageDirectoryPath).then(paths => {
-            const musicPath = paths.find(path => path.name === "Music")
+            const musicPath = paths.find((path) => path.name === "Music")
 
             if (!musicPath) {
-                console.error('O diretório padrão de músicas não foi encontrado...')
+                console.error('The default music directory could not be found...')
                 return
             }
 
@@ -57,16 +57,16 @@ export function TrackerProvider(props: TrackerProviderProps) {
                     const musics = files.filter(file => match(file.name))
                         .map(async (music) => {
                             const tags = await getMusicTags(music)
-                            
+
                             return {
                                 url: music.path,
-                                title: "title" in tags ? tags.title : music.name,
+                                title: "title" in tags ? tags.title : music.name.replace(/\.[^.]+$/, ''),
                                 artist: "artist" in tags ? tags.artist : "Unknown Artist"
                             }
                         })
 
                     Promise.all(musics).then((musics) => {
-                        setTrack(musics)
+                        setTrack((prevTracks) => [...prevTracks, ...musics]);
                     }).catch((error) => {
                         console.log(error)
                     })

@@ -17,6 +17,8 @@ import { TouchableOpacity, Image } from 'react-native'
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5'
 
+import TrackPlayer from 'react-native-track-player'
+
 export function FooterBar() {
     return(
         <Footer>
@@ -32,16 +34,23 @@ export function FooterBar() {
             
             <PlayerManager>
                 <Player>
-                    <TouchableOpacity>
-                        <Ionicons name='play-skip-back' size={20}/>
+                    <TouchableOpacity
+                        onPress={() => TrackPlayer.skipToPrevious()}
+                    >
+                        <Ionicons color={'#ECECEC'} name='play-skip-back' size={20}/>
                     </TouchableOpacity>
 
-                    <TouchableOpacity>
-                        <FontAwesome5 name='pause' size={20}/>
+                    <TouchableOpacity
+                        onPress={() => {
+                        }}
+                    >
+                        <FontAwesome5 color={'#ECECEC'} name='pause' size={20}/>
                     </TouchableOpacity>
 
-                    <TouchableOpacity>
-                        <Ionicons name='play-skip-forward' size={20}/>
+                    <TouchableOpacity
+                        onPress={() => TrackPlayer.skipToNext}
+                    >
+                        <Ionicons color={'#ECECEC'} name='play-skip-forward' size={20}/>
                     </TouchableOpacity>
                 </Player>
 

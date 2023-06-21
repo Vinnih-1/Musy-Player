@@ -15,7 +15,7 @@ export function NavigationBar(props: NavbarProps) {
             <Navbar>
                 <SideMenuView>
                     <TouchableOpacity>
-                        <MaterialCommunityIcons name='text' size={30}/>
+                        <MaterialCommunityIcons color={'#ECECEC'} name='text' size={30}/>
                     </TouchableOpacity>
 
                     <Title>
@@ -25,7 +25,7 @@ export function NavigationBar(props: NavbarProps) {
 
                 <SearchView>
                     <TouchableOpacity>
-                        <MaterialIcons name='search' size={40}/>
+                        <MaterialIcons color={'#ECECEC'} name='search' size={40}/>
                     </TouchableOpacity>
                 </SearchView>
             </Navbar>

@@ -1,6 +1,7 @@
 import React from 'react'
 import { ThemeProvider } from 'styled-components'
 import { Home } from './pages/home'
+import { TrackerProvider } from './contexts/track/TrackerContext'
 
 const collors = {
   background: '#2F2F2F',
@@ -9,9 +10,11 @@ const collors = {
 
 function App(): JSX.Element {
   return (
-    <ThemeProvider theme={collors}>
-      <Home/>
-    </ThemeProvider>
+    <TrackerProvider>
+      <ThemeProvider theme={collors}>
+        <Home/>
+      </ThemeProvider>
+    </TrackerProvider>
   )
 }
 

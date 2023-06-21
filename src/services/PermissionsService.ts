@@ -6,7 +6,7 @@ export const RequestPermissions = async () => {
   );
 
   if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-    console.log('Acesso ao armazenamento externo concedido pelo usuário.');
+    console.log('Access to external storage granted by the user.');
   } else
-    console.log('O acesso ao armazenamento externo foi negado pelo usuário.');
+    console.log('Access to external storage has been denied by the user.');
 };

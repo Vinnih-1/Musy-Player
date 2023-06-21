@@ -1,6 +1,6 @@
 import React, { ReactNode, createContext, useEffect, useState } from 'react'
 
-import { FFmpegKit, FFprobeKit, FFmpegKitConfig } from 'ffmpeg-kit-react-native'
+import { FFmpegKit, FFprobeKit } from 'ffmpeg-kit-react-native'
 import TrackPlayer from 'react-native-track-player'
 import { minimatch } from 'minimatch'
 import RNFS from 'react-native-fs'

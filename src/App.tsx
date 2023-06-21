@@ -5,14 +5,14 @@ import { TrackerProvider } from './contexts/track/TrackerContext'
 
 const collors = {
   background: '#2F2F2F',
-  footer: '#161616'
+  footer: '#161616',
 }
 
-function App(): JSX.Element {
+function App() {
   return (
     <TrackerProvider>
       <ThemeProvider theme={collors}>
-        <Home/>
+        <Home />
       </ThemeProvider>
     </TrackerProvider>
   )

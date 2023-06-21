@@ -4,7 +4,8 @@ export const Footer = styled.View`
     flex: 1;
     flex-direction: row;
     max-height: 10%;
-    border-radius: 40px;
+    border-top-right-radius: 30px;
+    border-top-left-radius: 30px;
     justify-content: space-around;
     align-items: center;
     background-color: ${props => props.theme.footer};

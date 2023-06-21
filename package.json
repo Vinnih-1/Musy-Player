@@ -12,6 +12,7 @@
   "dependencies": {
     "react": "18.2.0",
     "react-native": "0.71.11",
+    "react-native-track-player": "^3.2.0",
     "react-native-vector-icons": "^9.2.0",
     "react-native-vector-image": "^0.4.2",
     "styled-components": "^6.0.0-rc.3"

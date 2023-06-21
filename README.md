@@ -12,3 +12,4 @@ App is based at this [design](https://www.figma.com/community/file/1217535322790
 
 - [styled-components](https://github.com/styled-components/styled-components)
 - [react-native-vector-icons](https://github.com/oblador/react-native-vector-icons)
+- [react-native-track-player](https://github.com/doublesymmetry/react-native-track-player)

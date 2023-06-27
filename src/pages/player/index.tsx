@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { ReactNode, createContext, useContext, useEffect, useState } from 'react'
 import { Image, TouchableOpacity } from 'react-native'
 import { StackNavigationProp } from '@react-navigation/stack'
 
@@ -24,6 +24,7 @@ import FontAwesome5 from 'react-native-vector-icons/FontAwesome5'
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import TrackPlayer, { Event, RepeatMode, State, useProgress, } from 'react-native-track-player'
 import * as Progress from 'react-native-progress'
+import { TrackerContext, loadAllTracks } from '../../contexts/track/TrackerContext'
 
 interface RootStackParamList {
     Songs: undefined;
@@ -42,6 +43,44 @@ interface MusicProps {
 }
 
 export function Player({navigation}: PlayerScreenProps) {
+	const [queueButtons, setQueueButtons] = useState<QueueButtonProps>()
+	const queueContext = useContext(QueueButtonsContext)
+	const trackerContext = useContext(TrackerContext)
+
+	useEffect(() => {
+		if (queueContext) {
+			setQueueButtons(queueContext.getProps())
+		}
+	}, [])
+
+	function handleRepeatButton(repeat: boolean) {
+		setQueueButtons((prevState) => {
+			if (prevState) {
+				return { ...prevState, repeat: repeat }
+			}
+		})
+	}
+
+	function handleShuffleButton(shuffle: boolean) {
+		setQueueButtons((prevState) => {
+			if (prevState) {
+				return { ...prevState, shuffle: shuffle }
+			}
+		})
+		
+		if (trackerContext) {
+			if (shuffle) {
+				trackerContext.shuffleTrack()
+			} else {
+				loadAllTracks().then(track => {
+					if (track) {
+						trackerContext.setTrack(track)
+					}
+				})
+			}
+		}
+	}
+
 	return(
 		<Background>
 			<Navbar>
@@ -61,7 +100,52 @@ export function Player({navigation}: PlayerScreenProps) {
 				</MusicImage>
 				<MusicName />
 				<PlayerManager>
-					<QueueButtons/>
+					<PlayerIcons>
+						<TouchableOpacity>
+							<Ionicons color={'#ECECEC'} name='volume-medium' size={25} />
+						</TouchableOpacity>
+
+						<TouchableOpacity>
+							<MaterialCommunityIcons color={'#ECECEC'} name='playlist-play' size={25} />
+						</TouchableOpacity>
+
+						<TouchableOpacity 
+							onPress={() => {
+								if (queueContext) {
+									if (queueContext.getShuffle()) {
+										queueContext.setShuffle(false)
+										handleShuffleButton(false)
+									} else {
+										queueContext.setShuffle(true)
+										handleShuffleButton(true)
+									}
+								}
+							}}>
+							<Ionicons color={queueButtons?.shuffle ? '#ECECEC' : 'gray'} name='shuffle' size={25} />
+						</TouchableOpacity>
+
+						<TouchableOpacity
+							onPress={() => {
+								if (queueContext) {
+									if (queueContext.getRepeat()) {
+										queueContext.setRepeat(false)
+										handleRepeatButton(false)
+										TrackPlayer.setRepeatMode(RepeatMode.Off)
+									} else {
+										queueContext.setRepeat(true)
+										handleRepeatButton(true)
+										TrackPlayer.setRepeatMode(RepeatMode.Queue)
+									}
+								}
+							}}
+						>
+							<Ionicons color={queueButtons?.repeat ? '#ECECEC' : 'gray'} name='repeat' size={25} />
+						</TouchableOpacity>
+
+						<TouchableOpacity>
+							<Ionicons color={'#ECECEC'} name='heart-sharp' size={25} />
+						</TouchableOpacity>
+					</PlayerIcons>
 					<ProgressBar />
 					<PlayerButton />
 				</PlayerManager>
@@ -70,41 +154,88 @@ export function Player({navigation}: PlayerScreenProps) {
 	)
 }
 
-export function QueueButtons() {
-	const [repeat, setRepeat] = useState<boolean>(false)
+interface QueueButtonContextProps {
+	props: QueueButtonProps;
+	getRepeat: () => boolean;
+	getShuffle: () => boolean;
+	getProps: () => QueueButtonProps;
+	setRepeat: (repeat: boolean) => void;
+	setShuffle: (shuffle: boolean) => void;
+}
+
+interface QueueButtonProps {
+	repeat: boolean;
+	shuffle: boolean;
+	loved: boolean;
+}
+
+interface QueueButtonProviderProps {
+	children: ReactNode;
+}
+
+export const QueueButtonsContext = createContext<QueueButtonContextProps | undefined>(undefined)
+
+export function QueueButtonsProvider({ children }: QueueButtonProviderProps) {
+	const [queueButtons, setQueueButtons] = useState<QueueButtonProps>({ loved: false, repeat: false, shuffle: false })
+
+	function getRepeat(): boolean {
+		if (queueButtons) {
+			return queueButtons.repeat
+		} else {
+			return false
+		}
+	}
+
+	function getShuffle(): boolean {
+		if (queueButtons) {
+			return queueButtons.shuffle
+		} else {
+			return false
+		}
+	}
+
+	function getProps(): QueueButtonProps {
+		if (queueButtons) {
+			return queueButtons
+		}
+		return { loved: false, repeat: false, shuffle: false }
+	}
+
+	function setRepeat(repeat: boolean) {
+		if (queueButtons) {
+			setQueueButtons((prevState) => {
+				if (prevState) {
+					return { ...prevState, repeat }
+				}
+				return prevState
+			})
+		}
+	}
+
+	function setShuffle(shuffle: boolean) {
+		if (queueButtons) {
+			setQueueButtons((prevState) => {
+				if (prevState) {
+					return { ...prevState, shuffle }
+				}
+				return prevState
+			})
+		}
+	}
+
+	const queueButtonsValue: QueueButtonContextProps = {
+		props: { loved: false, repeat: false, shuffle: false },
+		getRepeat,
+		getShuffle,
+		getProps,
+		setRepeat,
+		setShuffle
+	}
 
 	return(
-		<PlayerIcons>
-			<TouchableOpacity>
-				<Ionicons color={'#ECECEC'} name='volume-medium' size={25} />
-			</TouchableOpacity>
-
-			<TouchableOpacity>
-				<MaterialCommunityIcons color={'#ECECEC'} name='playlist-play' size={25} />
-			</TouchableOpacity>
-
-			<TouchableOpacity>
-				<Ionicons color={'gray'} name='shuffle' size={25} />
-			</TouchableOpacity>
-
-			<TouchableOpacity
-				onPress={() => {
-					setRepeat(!repeat)
-
-					if (repeat) {
-						TrackPlayer.setRepeatMode(RepeatMode.Queue)
-					} else {
-						TrackPlayer.setRepeatMode(RepeatMode.Off)
-					}
-				}}
-			>
-				<Ionicons color={repeat ? '#ECECEC' : 'gray'} name='repeat' size={25} />
-			</TouchableOpacity>
-
-			<TouchableOpacity>
-				<Ionicons color={'#ECECEC'} name='heart-sharp' size={25} />
-			</TouchableOpacity>
-		</PlayerIcons>
+		<QueueButtonsContext.Provider value={queueButtonsValue}>
+			{children}
+		</QueueButtonsContext.Provider>
 	)
 }
 

@@ -4,7 +4,7 @@ import { Songs } from './pages/songs'
 import { TrackerProvider } from './contexts/track/TrackerContext'
 import { NavigationContainer } from '@react-navigation/native'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
-import { Player } from './pages/player'
+import { Player, QueueButtonsProvider } from './pages/player'
 
 const collors = {
 	background: '#2F2F2F',
@@ -16,14 +16,16 @@ const Stack = createNativeStackNavigator()
 function App() {
 	return (
 		<TrackerProvider>
-			<ThemeProvider theme={collors}>
-				<NavigationContainer>
-					<Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName='Songs'>
-						<Stack.Screen name='Songs' component={Songs} />
-						<Stack.Screen name='Player' component={Player} />
-					</Stack.Navigator>
-				</NavigationContainer>
-			</ThemeProvider>
+			<QueueButtonsProvider>
+				<ThemeProvider theme={collors}>
+					<NavigationContainer>
+						<Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName='Songs'>
+							<Stack.Screen name='Songs' component={Songs} />
+							<Stack.Screen name='Player' component={Player} />
+						</Stack.Navigator>
+					</NavigationContainer>
+				</ThemeProvider>
+			</QueueButtonsProvider>
 		</TrackerProvider>
 	)
 }

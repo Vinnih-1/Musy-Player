@@ -15,8 +15,9 @@ const Stack = createNativeStackNavigator()
 
 function App() {
 	return (
-		<TrackerProvider>
-			<QueueButtonsProvider>
+		<QueueButtonsProvider>
+			<TrackerProvider>
+
 				<ThemeProvider theme={collors}>
 					<NavigationContainer>
 						<Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName='Songs'>
@@ -25,8 +26,8 @@ function App() {
 						</Stack.Navigator>
 					</NavigationContainer>
 				</ThemeProvider>
-			</QueueButtonsProvider>
-		</TrackerProvider>
+			</TrackerProvider>
+		</QueueButtonsProvider>
 	)
 }
 

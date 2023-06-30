@@ -34,7 +34,7 @@ export function FooterBar({navigation}: SongsScreenProps) {
 		const remotePlayEvent = TrackPlayer.addEventListener(Event.RemotePlay, () => { TrackPlayer.play(); setPaused(false) })
 		const remotePauseEvent = TrackPlayer.addEventListener(Event.RemotePause, () => { TrackPlayer.pause(); setPaused(true) })
 
-		const playingEvent = TrackPlayer.addEventListener(Event.PlaybackState, (track) => {
+		const playbackStateEvent = TrackPlayer.addEventListener(Event.PlaybackState, (track) => {
 			if (track) {
 				if (track.state.toString() === 'playing') {
 					setPaused(false)
@@ -50,7 +50,7 @@ export function FooterBar({navigation}: SongsScreenProps) {
 		})
 
 		return () => {
-			playingEvent.remove()
+			playbackStateEvent.remove()
 			remotePlayEvent.remove()
 			remotePauseEvent.remove()
 		}

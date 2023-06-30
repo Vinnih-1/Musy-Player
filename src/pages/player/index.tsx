@@ -24,7 +24,7 @@ import FontAwesome5 from 'react-native-vector-icons/FontAwesome5'
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import TrackPlayer, { Event, RepeatMode, State, useProgress, } from 'react-native-track-player'
 import * as Progress from 'react-native-progress'
-import { TrackerContext, loadAllTracks } from '../../contexts/track/TrackerContext'
+import { TrackerContext } from '../../contexts/track/TrackerContext'
 
 interface RootStackParamList {
     Songs: undefined;
@@ -45,7 +45,6 @@ interface MusicProps {
 export function Player({navigation}: PlayerScreenProps) {
 	const [queueButtons, setQueueButtons] = useState<QueueButtonProps>()
 	const queueContext = useContext(QueueButtonsContext)
-	const trackerContext = useContext(TrackerContext)
 
 	useEffect(() => {
 		if (queueContext) {
@@ -67,18 +66,6 @@ export function Player({navigation}: PlayerScreenProps) {
 				return { ...prevState, shuffle: shuffle }
 			}
 		})
-		
-		if (trackerContext) {
-			if (shuffle) {
-				trackerContext.shuffleTrack()
-			} else {
-				loadAllTracks().then(track => {
-					if (track) {
-						trackerContext.setTrack(track)
-					}
-				})
-			}
-		}
 	}
 
 	return(
@@ -241,6 +228,7 @@ export function QueueButtonsProvider({ children }: QueueButtonProviderProps) {
 
 export function PlayerButton() {
 	const [paused, setPaused] = useState<boolean>(true)
+	const trackerContext = useContext(TrackerContext)
 
 	TrackPlayer.addEventListener(Event.RemotePlay, () => { TrackPlayer.play(); setPaused(false) })
 	TrackPlayer.addEventListener(Event.RemotePause, () => { TrackPlayer.pause(); setPaused(true) })
@@ -272,7 +260,19 @@ export function PlayerButton() {
 	return (
 		<PlayerButtons>
 			<TouchableOpacity
-				onPress={() => TrackPlayer.skipToPrevious()}
+				onPress={() => {
+					if (trackerContext) {
+						const currentTrack = trackerContext.getCurrentTrack()
+						
+						if (currentTrack) {
+							const previousTrack = trackerContext.previousTrack(currentTrack)
+
+							if (previousTrack) {
+								trackerContext.playTrack(previousTrack)
+							}
+						}
+					}
+				}}
 			>
 				<Ionicons color={'#ECECEC'} name='play-skip-back' size={40} />
 			</TouchableOpacity>
@@ -282,7 +282,19 @@ export function PlayerButton() {
 			</TouchableOpacity>
 
 			<TouchableOpacity
-				onPress={() => TrackPlayer.skipToNext()}
+				onPress={() => {
+					if (trackerContext) {
+						const currentTrack = trackerContext.getCurrentTrack()
+						
+						if (currentTrack) {
+							const nextTrack = trackerContext.nextTrack(currentTrack)
+							
+							if (nextTrack) {
+								trackerContext.playTrack(nextTrack)
+							}
+						}
+					}
+				}}
 			>
 				<Ionicons color={'#ECECEC'} name='play-skip-forward' size={40} />
 			</TouchableOpacity>
@@ -292,31 +304,21 @@ export function PlayerButton() {
 
 export function MusicName() {
 	const [music, setMusic] = useState<MusicProps>()
+	const trackerContext = useContext(TrackerContext)
+	const progress = useProgress()
 
 	useEffect(() => {
-		setTrack()
-
-		const trackChangedListener = TrackPlayer.addEventListener(Event.PlaybackTrackChanged, () => {
-			setTrack()
-		})
-	
-		return () => {
-			trackChangedListener.remove()
+		if (trackerContext) {
+			setMusic(
+				{ 
+					title: trackerContext.getCurrentTrack()?.title ?? '', 
+					artist: trackerContext.getCurrentTrack()?.artist ?? '',
+					duration: '',
+					position: ''
+				}
+			)
 		}
-	}, [])
-
-	function setTrack() {
-		TrackPlayer.getCurrentTrack().then((track) => {
-			TrackPlayer.getTrack(Number(track)).then(async (track) => {
-				const title = track?.title ?? ''
-				const artist = track?.artist ?? ''
-				const durationSeconds = await TrackPlayer.getDuration()
-				const duration = `${Math.floor(durationSeconds / 60)}:${(Math.floor(durationSeconds) % 60)}`
-
-				setMusic({ title: title, artist: artist, duration: duration, position: '0:00' })
-			})
-		})
-	}
+	}, [progress])
 
 	return (
 		<MusicPlayingView>

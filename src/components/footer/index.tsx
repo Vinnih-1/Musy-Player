@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 
 import {
 	Footer,
@@ -21,32 +21,40 @@ import TrackPlayer, { State, Event, useProgress } from 'react-native-track-playe
 import * as Progress from 'react-native-progress'
 
 import { SongsScreenProps } from '../../pages/songs'
+import { TrackerContext } from '../../contexts/track/TrackerContext'
 
 export function FooterBar({navigation}: SongsScreenProps) {
+	const trackerContext = useContext(TrackerContext)
 	const [paused, setPaused] = useState<boolean>(true)
 	const [title, setTitle] = useState<string>('')
 	const [artist, setArtist] = useState<string>('')
 	const progress = useProgress()
 
-	TrackPlayer.addEventListener(Event.RemotePlay, () => { TrackPlayer.play(); setPaused(false) })
-	TrackPlayer.addEventListener(Event.RemotePause, () => { TrackPlayer.pause(); setPaused(true) })
-	TrackPlayer.addEventListener(Event.PlaybackTrackChanged, async (changed) => {
-		const track = await TrackPlayer.getTrack(changed.nextTrack)
-		if (track) {
-			setTitle(track.title ?? '')
-			setArtist(track.artist ?? '')
-		}
-	})
+	useEffect(() => {
+		const remotePlayEvent = TrackPlayer.addEventListener(Event.RemotePlay, () => { TrackPlayer.play(); setPaused(false) })
+		const remotePauseEvent = TrackPlayer.addEventListener(Event.RemotePause, () => { TrackPlayer.pause(); setPaused(true) })
 
-	TrackPlayer.addEventListener(Event.PlaybackState, (track) => {
-		if (track) {
-			if (track.state.toString() === 'playing') {
-				setPaused(false)
-			} else {
-				setPaused(true)
+		const playingEvent = TrackPlayer.addEventListener(Event.PlaybackState, (track) => {
+			if (track) {
+				if (track.state.toString() === 'playing') {
+					setPaused(false)
+				} else {
+					setPaused(true)
+				}
+
+				if (trackerContext) {
+					setTitle(trackerContext.getCurrentTrack()?.title ?? '')
+					setArtist(trackerContext.getCurrentTrack()?.artist ?? '')
+				}
 			}
+		})
+
+		return () => {
+			playingEvent.remove()
+			remotePlayEvent.remove()
+			remotePauseEvent.remove()
 		}
-	})
+	}, [])
 
 	async function handlePlayPause() {
 		const state = await TrackPlayer.getState()

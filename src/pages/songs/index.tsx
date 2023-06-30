@@ -8,7 +8,6 @@ import { Background, MusicList } from './styles'
 import { RequestPermissions } from '../../services/PermissionsService'
 
 import { StackNavigationProp } from '@react-navigation/stack'
-import TrackPlayer, { Event } from 'react-native-track-player'
 
 interface RootStackParamList {
 	Player: undefined;

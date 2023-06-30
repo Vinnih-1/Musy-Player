@@ -8,6 +8,7 @@ import { Background, MusicList } from './styles'
 import { RequestPermissions } from '../../services/PermissionsService'
 
 import { StackNavigationProp } from '@react-navigation/stack'
+import TrackPlayer, { Event } from 'react-native-track-player'
 
 interface RootStackParamList {
 	Player: undefined;
@@ -19,16 +20,16 @@ export interface SongsScreenProps {
 }
 
 export function Songs({navigation}: SongsScreenProps) {
-	const trackContext = useContext(TrackerContext)
+	const trackerContext = useContext(TrackerContext)
 	const [tracks, setTracks] = useState<TrackProps[]>([])
 	
 	useEffect(() => {
 		RequestPermissions().then(status => {
 			if (status === PermissionsAndroid.RESULTS.GRANTED) {
-				if (trackContext) {
+				if (trackerContext) {
 					loadAllTracks().then(tracks => {
 						if (tracks) {
-							trackContext.setTrack(tracks)
+							trackerContext.setTrack(tracks)
 							setTracks(tracks)
 						}
 					})

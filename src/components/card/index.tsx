@@ -16,27 +16,30 @@ export function MusicCard(props: TrackProps) {
 	const trackerContext = useContext(TrackerContext)
 	const [playing, setPlaying] = useState(false)
 
-	TrackPlayer.addEventListener(Event.PlaybackTrackChanged, changed => {
-		if (trackerContext) {
-			let index = changed.nextTrack
-			if (index >= trackerContext.getTrack().length - 1) {
-				index = 0
+	TrackPlayer.addEventListener(Event.PlaybackTrackChanged, () => {
+		setTimeout(() => {
+			if (trackerContext) {
+				const currentTrack = trackerContext.getCurrentTrack()
+	
+				if (currentTrack) {
+					if (currentTrack.url === props.url) {
+						setPlaying(true)
+					} else {
+						setPlaying(false)
+					}
+				}
 			}
-			const track = trackerContext.getTrack()[index]
-
-			if (track.url === props.url) {
-				setPlaying(true)
-			} else {
-				setPlaying(false)
-			}
-		}
+		}, 500)
 	})
 
 	return (
 		<Background onPress={() => {
 			if (trackerContext) {
-				const musicIndex = trackerContext.getTrack().findIndex(music => music.url === props.url)
-				TrackPlayer.skip(musicIndex).then(() => TrackPlayer.play())
+				const track = trackerContext.getTrackByUrl(props)
+
+				if (track) {
+					trackerContext.playTrack(track)
+				}
 			}
 		}}>
 			<CardInformation>

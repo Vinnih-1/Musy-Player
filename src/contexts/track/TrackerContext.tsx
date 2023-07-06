@@ -30,8 +30,6 @@ export function TrackerProvider(props: TrackerProviderProps) {
 
 	TrackPlayer.addEventListener(Event.PlaybackTrackChanged, trackIndex => {
 		track.current = tracks[trackIndex.nextTrack]
-
-		console.log(tracks[trackIndex.nextTrack])
 	})
 
 	function getTrack(): TrackProps[] {

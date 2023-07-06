@@ -1,5 +1,5 @@
 /* eslint-disable no-inner-declarations */
-import React, { ReactNode, createContext, useEffect, useRef, useState } from 'react'
+import React, { ReactNode, createContext, useRef, useState } from 'react'
 
 import { FFprobeKit } from 'ffmpeg-kit-react-native'
 import TrackPlayer, { Track, Event } from 'react-native-track-player'

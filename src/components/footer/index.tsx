@@ -30,6 +30,17 @@ export function FooterBar({navigation}: SongsScreenProps) {
 	const [artist, setArtist] = useState<string>('')
 	const progress = useProgress()
 
+	TrackPlayer.addEventListener(Event.PlaybackTrackChanged, () => {
+		if (trackerContext) {
+			const currentTrack = trackerContext.getCurrentTrack()
+	
+			if (currentTrack) {
+				setTitle(currentTrack.title ?? '')
+				setArtist(currentTrack.artist ?? '')
+			}
+		}
+	})
+
 	useEffect(() => {
 		const remotePlayEvent = TrackPlayer.addEventListener(Event.RemotePlay, () => { TrackPlayer.play(); setPaused(false) })
 		const remotePauseEvent = TrackPlayer.addEventListener(Event.RemotePause, () => { TrackPlayer.pause(); setPaused(true) })
@@ -40,15 +51,6 @@ export function FooterBar({navigation}: SongsScreenProps) {
 					setPaused(false)
 				} else {
 					setPaused(true)
-				}
-
-				if (trackerContext) {
-					const currentTrack = trackerContext.getCurrentTrack()
-
-					if (currentTrack) {
-						setTitle(currentTrack.title ?? '')
-						setArtist(currentTrack.artist ?? '')
-					}
 				}
 			}
 		})

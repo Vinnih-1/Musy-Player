@@ -43,8 +43,12 @@ export function FooterBar({navigation}: SongsScreenProps) {
 				}
 
 				if (trackerContext) {
-					setTitle(trackerContext.getCurrentTrack()?.title ?? '')
-					setArtist(trackerContext.getCurrentTrack()?.artist ?? '')
+					const currentTrack = trackerContext.getCurrentTrack()
+
+					if (currentTrack) {
+						setTitle(currentTrack.title ?? '')
+						setArtist(currentTrack.artist ?? '')
+					}
 				}
 			}
 		})

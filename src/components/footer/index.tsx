@@ -85,19 +85,7 @@ export function FooterBar({navigation}: SongsScreenProps) {
 			<PlayerManager>
 				<Player>
 					<TouchableOpacity
-						onPress={() => {
-							if (trackerContext) {
-								const currentTrack = trackerContext.getCurrentTrack()
-								
-								if (currentTrack) {
-									const previousTrack = trackerContext.previousTrack(currentTrack)
-		
-									if (previousTrack) {
-										trackerContext.playTrack(previousTrack)
-									}
-								}
-							}
-						}}
+						onPress={() => TrackPlayer.skipToPrevious()}
 					>
 						<Ionicons color={'#ECECEC'} name='play-skip-back' size={20} />
 					</TouchableOpacity>
@@ -107,19 +95,7 @@ export function FooterBar({navigation}: SongsScreenProps) {
 					</TouchableOpacity>
 
 					<TouchableOpacity
-						onPress={() => {
-							if (trackerContext) {
-								const currentTrack = trackerContext.getCurrentTrack()
-								
-								if (currentTrack) {
-									const nextTrack = trackerContext.nextTrack(currentTrack)
-									
-									if (nextTrack) {
-										trackerContext.playTrack(nextTrack)
-									}
-								}
-							}
-						}}
+						onPress={() => TrackPlayer.skipToNext()}
 					>
 						<Ionicons color={'#ECECEC'} name='play-skip-forward' size={20} />
 					</TouchableOpacity>

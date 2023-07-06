@@ -1,113 +1,30 @@
-/* eslint-disable react/prop-types */
 /* eslint-disable no-inner-declarations */
-import React, { ReactNode, createContext, useContext, useRef, useState } from 'react'
+import React, { ReactNode, createContext, useState } from 'react'
 
 import { FFprobeKit } from 'ffmpeg-kit-react-native'
-import TrackPlayer, { Event } from 'react-native-track-player'
+import TrackPlayer, { RepeatMode } from 'react-native-track-player'
 import { minimatch } from 'minimatch'
 import RNFS from 'react-native-fs'
-import { QueueButtonsContext } from '../../pages/player'
 
 interface TrackerContextProps {
-	getTrack: () => TrackProps[];
+    getTrack: () => TrackProps[];
 	setTrack: (track: TrackProps[]) => TrackProps[];
-	getTrackByUrl: (track: TrackProps) => TrackProps | undefined;
-	playTrack: (track: TrackProps) => void;
-	nextTrack: (track: TrackProps) => TrackProps | undefined;
-	previousTrack: (track: TrackProps) => TrackProps | undefined;
-	getCurrentTrack: () => TrackProps | undefined;
 }
 
 export interface TrackProps {
-	url: string;
-	title: string;
-	artist: string;
+    url: string;
+    title: string;
+    artist: string;
 }
 
 interface TrackerProviderProps {
-	children: ReactNode;
+    children: ReactNode;
 }
 
 export const TrackerContext = createContext<TrackerContextProps | undefined>(undefined)
 
 export function TrackerProvider(props: TrackerProviderProps) {
 	const [tracks, setTracks] = useState<TrackProps[]>([])
-	const queueButtonsContext = useContext(QueueButtonsContext)
-	const track = useRef<TrackProps>()
-
-	TrackPlayer.addEventListener(Event.PlaybackQueueEnded, () => {
-		if (track.current) {
-			const next = nextTrack(track.current)
-			if (next) {
-				playTrack(next)
-			}
-		}
-	})
-
-	function playTrack(props: TrackProps) {
-		TrackPlayer.reset().then(() => {
-			TrackPlayer.removeUpcomingTracks().then(() => {
-			
-				if (props) {
-					TrackPlayer.add(props).then(() => {
-						TrackPlayer.play().then(() => track.current = props)
-					})
-				}
-			})	
-		})
-	}
-
-	function getCurrentTrack(): TrackProps | undefined {
-		if (track.current) {
-			return track.current
-		}
-	}
-
-	function nextTrack(props: TrackProps): TrackProps | undefined {
-		const currentTrack = getTrackByUrl(props)
-
-		if (currentTrack) {
-			const currentTrackIndex = tracks.findIndex(track => track.url === currentTrack.url) 
-			
-			if ((currentTrackIndex + 1) === tracks.length) {
-				if (queueButtonsContext) {
-					if (queueButtonsContext.getRepeat()) {
-						return tracks[0]
-					}
-				}
-			}
-
-			if (currentTrackIndex) {
-				return tracks[currentTrackIndex + 1]
-			}
-		}
-	}
-
-	function previousTrack(props: TrackProps): TrackProps | undefined {
-		const currentTrack = getTrackByUrl(props)
-
-		if (currentTrack) {
-			const currentTrackIndex = tracks.findIndex(track => track.url === currentTrack.url) 
-			
-			if (currentTrackIndex === 0) {
-				if (queueButtonsContext) {
-					if (queueButtonsContext.getRepeat()) {
-						return tracks[tracks.length - 1]
-					}
-				}
-			}
-
-			if (currentTrackIndex) {
-				return tracks[currentTrackIndex - 1]
-			}
-		}
-
-		return
-	}
-
-	function getTrackByUrl(props: TrackProps): TrackProps | undefined {		
-		return tracks.find(track => track.url === props.url)
-	}
 
 	function getTrack(): TrackProps[] {
 		return tracks
@@ -115,17 +32,13 @@ export function TrackerProvider(props: TrackerProviderProps) {
 
 	function setTrack(track: TrackProps[]): TrackProps[] {
 		setTracks(track)
+		TrackPlayer.add(track)
 		return track
 	}
 
 	const trackContextValue: TrackerContextProps = {
 		getTrack,
-		setTrack,
-		getTrackByUrl,
-		playTrack,
-		nextTrack,
-		previousTrack,
-		getCurrentTrack
+		setTrack
 	}
 
 	return (

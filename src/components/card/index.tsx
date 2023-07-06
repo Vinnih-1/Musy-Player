@@ -16,18 +16,16 @@ export function MusicCard(props: TrackProps) {
 	const trackerContext = useContext(TrackerContext)
 	const [playing, setPlaying] = useState(false)
 
-	TrackPlayer.addEventListener(Event.PlaybackTrackChanged, changed => {
+	TrackPlayer.addEventListener(Event.PlaybackTrackChanged, () => {
 		if (trackerContext) {
-			let index = changed.nextTrack
-			if (index >= trackerContext.getTrack().length - 1) {
-				index = 0
-			}
-			const track = trackerContext.getTrack()[index]
+			const track = trackerContext.getCurrentTrack()
 
-			if (track.url === props.url) {
-				setPlaying(true)
-			} else {
-				setPlaying(false)
+			if (track) {
+				if (track.url === props.url) {
+					setPlaying(true)
+				} else {
+					setPlaying(false)
+				}
 			}
 		}
 	})

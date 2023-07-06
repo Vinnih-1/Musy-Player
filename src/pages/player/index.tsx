@@ -229,7 +229,6 @@ export function QueueButtonsProvider({ children }: QueueButtonProviderProps) {
 
 export function PlayerButton() {
 	const [paused, setPaused] = useState<boolean>(true)
-	const trackerContext = useContext(TrackerContext)
 
 	TrackPlayer.addEventListener(Event.RemotePlay, () => { TrackPlayer.play(); setPaused(false) })
 	TrackPlayer.addEventListener(Event.RemotePause, () => { TrackPlayer.pause(); setPaused(true) })
@@ -261,19 +260,7 @@ export function PlayerButton() {
 	return (
 		<PlayerButtons>
 			<TouchableOpacity
-				onPress={() => {
-					if (trackerContext) {
-						const currentTrack = trackerContext.getCurrentTrack()
-						
-						if (currentTrack) {
-							const previousTrack = trackerContext.previousTrack(currentTrack)
-
-							if (previousTrack) {
-								trackerContext.playTrack(previousTrack)
-							}
-						}
-					}
-				}}
+				onPress={() => TrackPlayer.skipToPrevious()}
 			>
 				<Ionicons color={'#ECECEC'} name='play-skip-back' size={40} />
 			</TouchableOpacity>
@@ -283,19 +270,7 @@ export function PlayerButton() {
 			</TouchableOpacity>
 
 			<TouchableOpacity
-				onPress={() => {
-					if (trackerContext) {
-						const currentTrack = trackerContext.getCurrentTrack()
-						
-						if (currentTrack) {
-							const nextTrack = trackerContext.nextTrack(currentTrack)
-							
-							if (nextTrack) {
-								trackerContext.playTrack(nextTrack)
-							}
-						}
-					}
-				}}
+				onPress={() => TrackPlayer.skipToNext()}
 			>
 				<Ionicons color={'#ECECEC'} name='play-skip-forward' size={40} />
 			</TouchableOpacity>
@@ -310,10 +285,12 @@ export function MusicName() {
 
 	useEffect(() => {
 		if (trackerContext) {
+			const track = trackerContext.getCurrentTrack()
+
 			setMusic(
 				{ 
-					title: trackerContext.getCurrentTrack()?.title ?? '', 
-					artist: trackerContext.getCurrentTrack()?.artist ?? '',
+					title: track?.title ?? '', 
+					artist: track?.artist ?? '',
 					duration: '',
 					position: ''
 				}

@@ -84,7 +84,7 @@ export const PlayerIcons = styled.View`
 export const PlayerProgressBar = styled.View`
     flex: 1;
     width: 100%;
-    max-height: 15%;
+    max-height: 20%;
     justify-content: center;
     align-items: center;
 `

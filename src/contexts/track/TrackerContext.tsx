@@ -1,14 +1,15 @@
 /* eslint-disable no-inner-declarations */
-import React, { ReactNode, createContext, useState } from 'react'
+import React, { ReactNode, createContext, useEffect, useRef, useState } from 'react'
 
 import { FFprobeKit } from 'ffmpeg-kit-react-native'
-import TrackPlayer, { RepeatMode } from 'react-native-track-player'
+import TrackPlayer, { Track, Event } from 'react-native-track-player'
 import { minimatch } from 'minimatch'
 import RNFS from 'react-native-fs'
 
 interface TrackerContextProps {
     getTrack: () => TrackProps[];
 	setTrack: (track: TrackProps[]) => TrackProps[];
+	getCurrentTrack: () => Track | undefined;
 }
 
 export interface TrackProps {
@@ -25,6 +26,13 @@ export const TrackerContext = createContext<TrackerContextProps | undefined>(und
 
 export function TrackerProvider(props: TrackerProviderProps) {
 	const [tracks, setTracks] = useState<TrackProps[]>([])
+	const track = useRef<TrackProps>()
+
+	TrackPlayer.addEventListener(Event.PlaybackTrackChanged, trackIndex => {
+		track.current = tracks[trackIndex.nextTrack]
+
+		console.log(tracks[trackIndex.nextTrack])
+	})
 
 	function getTrack(): TrackProps[] {
 		return tracks
@@ -36,9 +44,14 @@ export function TrackerProvider(props: TrackerProviderProps) {
 		return track
 	}
 
+	function getCurrentTrack(): TrackProps | undefined {
+		return track.current
+	}
+
 	const trackContextValue: TrackerContextProps = {
 		getTrack,
-		setTrack
+		setTrack,
+		getCurrentTrack
 	}
 
 	return (

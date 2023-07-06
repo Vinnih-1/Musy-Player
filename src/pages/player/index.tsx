@@ -2,6 +2,8 @@ import React, { ReactNode, createContext, useContext, useEffect, useState } from
 import { Image, TouchableOpacity } from 'react-native'
 import { StackNavigationProp } from '@react-navigation/stack'
 
+import Slider from '@react-native-community/slider'
+
 import { 
 	ArtistText,
 	Background, 
@@ -23,7 +25,6 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5'
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import TrackPlayer, { Event, RepeatMode, State, useProgress, } from 'react-native-track-player'
-import * as Progress from 'react-native-progress'
 import { TrackerContext } from '../../contexts/track/TrackerContext'
 
 interface RootStackParamList {
@@ -343,16 +344,22 @@ export function ProgressBar() {
 		return position
 	}
 
+	function handleSliderChange(position: number) {
+		TrackPlayer.seekTo(Math.floor(position))
+	}
+
 	return (
 		<PlayerProgressBar>
-			<Progress.Bar 
-				borderWidth={0} 
-				color='#ECECEC' 
-				unfilledColor='#1A1A1A' 
-				height={3} width={330} 
-				progress={progress.duration && progress.position != 0 ? 
-					(Math.floor(progress.position) / Math.floor(progress.duration)): 0
-				} />
+			<Slider
+				style={{height: 2, width: '100%', padding: 10}}
+				minimumTrackTintColor="#ECECEC"
+				maximumTrackTintColor="#1A1A1A"
+				thumbTintColor="#ECECEC"
+				minimumValue={0}
+				maximumValue={Math.floor(progress.duration)}
+				value={Math.floor(progress.position)}
+				onValueChange={handleSliderChange}
+			/>
 			<PlayerProgressTimer>
 				<ArtistText>{getPosition()}</ArtistText>
 				<ArtistText>{getDuration()}</ArtistText>

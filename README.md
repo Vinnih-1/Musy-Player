@@ -2,7 +2,8 @@
 My music app created with React Native (without Expo). This app is being created by personal use with the intention of exercising my knowledge about React Native. This app is open-source and feel free to open a pull request if you want. I'll be happy to receive it! :)
 
 # Current state
-
+![Screenshot_20230706-162251 (1)](https://github.com/Vinnih-1/Musy-Player/assets/59892753/9908ad6c-5db2-4af0-9101-b996ba39a333)
+![Screenshot_20230706-162257 (1)](https://github.com/Vinnih-1/Musy-Player/assets/59892753/4af290c9-58f7-4a87-b45d-7bf0415225ca)
 
 # Design credits
 

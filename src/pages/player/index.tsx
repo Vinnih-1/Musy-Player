@@ -69,6 +69,14 @@ export function Player({navigation}: PlayerScreenProps) {
 		})
 	}
 
+	function handleMutedButton(muted: boolean) {
+		setQueueButtons((prevState) => {
+			if (prevState) {
+				return { ...prevState, muted: muted }
+			}
+		})
+	}
+
 	return(
 		<Background>
 			<Navbar>
@@ -89,11 +97,32 @@ export function Player({navigation}: PlayerScreenProps) {
 				<MusicName />
 				<PlayerManager>
 					<PlayerIcons>
-						<TouchableOpacity>
-							<Ionicons color={'#ECECEC'} name='volume-medium' size={25} />
+						<TouchableOpacity
+							onPress={() => {
+								if (queueContext) {
+									if (queueContext.getMuted()) {
+										queueContext.setMuted(false)
+										handleMutedButton(false)
+										TrackPlayer.setVolume(0)
+									} else {
+										queueContext.setMuted(true)
+										handleMutedButton(true)
+										TrackPlayer.setVolume(100)
+									}
+								}
+							}}
+						>
+							{
+								queueContext?.getMuted ?
+									<Ionicons color={'#ECECEC'} name='volume-mute' size={25} /> : 
+									<Ionicons color={'#ECECEC'} name='volume-medium' size={25} />
+							}
 						</TouchableOpacity>
 
-						<TouchableOpacity>
+						<TouchableOpacity 
+							onPress={() => {
+								navigation.navigate('Tracker')
+							}}>
 							<MaterialCommunityIcons color={'#ECECEC'} name='playlist-play' size={25} />
 						</TouchableOpacity>
 
@@ -146,15 +175,18 @@ interface QueueButtonContextProps {
 	props: QueueButtonProps;
 	getRepeat: () => boolean;
 	getShuffle: () => boolean;
+	getMuted: () => boolean;
 	getProps: () => QueueButtonProps;
 	setRepeat: (repeat: boolean) => void;
 	setShuffle: (shuffle: boolean) => void;
+	setMuted: (muted: boolean) => void;
 }
 
 interface QueueButtonProps {
 	repeat: boolean;
 	shuffle: boolean;
 	loved: boolean;
+	muted: boolean;
 }
 
 interface QueueButtonProviderProps {
@@ -164,7 +196,7 @@ interface QueueButtonProviderProps {
 export const QueueButtonsContext = createContext<QueueButtonContextProps | undefined>(undefined)
 
 export function QueueButtonsProvider({ children }: QueueButtonProviderProps) {
-	const [queueButtons, setQueueButtons] = useState<QueueButtonProps>({ loved: false, repeat: false, shuffle: false })
+	const [queueButtons, setQueueButtons] = useState<QueueButtonProps>({ loved: false, repeat: false, shuffle: false, muted: false })
 
 	function getRepeat(): boolean {
 		if (queueButtons) {
@@ -182,11 +214,19 @@ export function QueueButtonsProvider({ children }: QueueButtonProviderProps) {
 		}
 	}
 
+	function getMuted(): boolean {
+		if (queueButtons) {
+			return queueButtons.muted
+		} else {
+			return false
+		}
+	}
+
 	function getProps(): QueueButtonProps {
 		if (queueButtons) {
 			return queueButtons
 		}
-		return { loved: false, repeat: false, shuffle: false }
+		return { loved: false, repeat: false, shuffle: false, muted: false }
 	}
 
 	function setRepeat(repeat: boolean) {
@@ -211,13 +251,26 @@ export function QueueButtonsProvider({ children }: QueueButtonProviderProps) {
 		}
 	}
 
+	function setMuted(muted: boolean) {
+		if (queueButtons) {
+			setQueueButtons((prevState) => {
+				if (prevState) {
+					return { ...prevState, muted }
+				}
+				return prevState
+			})
+		}
+	}
+
 	const queueButtonsValue: QueueButtonContextProps = {
-		props: { loved: false, repeat: false, shuffle: false },
+		props: { loved: false, repeat: false, shuffle: false, muted: false },
 		getRepeat,
 		getShuffle,
+		getMuted,
 		getProps,
 		setRepeat,
-		setShuffle
+		setShuffle,
+		setMuted
 	}
 
 	return(

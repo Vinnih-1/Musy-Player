@@ -113,7 +113,7 @@ export function Player({navigation}: PlayerScreenProps) {
 							}}
 						>
 							{
-								queueContext?.getMuted ?
+								queueContext?.getMuted() ?
 									<Ionicons color={'#ECECEC'} name='volume-mute' size={25} /> : 
 									<Ionicons color={'#ECECEC'} name='volume-medium' size={25} />
 							}

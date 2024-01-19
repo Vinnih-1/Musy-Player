@@ -1,79 +1,45 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# Musy-Player
+My music app created with React Native (without Expo). This app is being created by personal use with the intention of exercising my knowledge about React Native. This app is open-source and feel free to open a pull request if you want. I'll be happy to receive it! :)
 
-# Getting Started
+# Current state
+![screen-20240119-1323292 (1)](https://github.com/Vinnih-1/Musy-Player/assets/59892753/590803ec-7698-4ca5-812e-3a3a9eff7d2d)
 
->**Note**: Make sure you have completed the [React Native - Environment Setup](https://reactnative.dev/docs/environment-setup) instructions till "Creating a new application" step, before proceeding.
+# TO DO
 
-## Step 1: Start the Metro Server
+| Task          | Description                                   | Done |
+|---------------|-----------------------------------------------|------|
+| Mute button     | mute and unmute at the Player page          |  ❌  |
+| Queue button    | open bottom sheet that contains queue musics|  ❌  |
+| Shuffle button  | shuffle queue musics                        |  ❌  |
+| Repeat button   | set repeat mode (OFF, TRACK and QUEUE)      |  ❌  |
+| Like button     | save current song in a liked playlist       |  ❌  |
+| Playlist page   | page containing all playlist created by user|  ❌  |
+| Artists page    | page containing all artists                 |  ❌  |
+| Albums page     | page containing all albums                  |  ❌  |
+| Folder page     | folder path where app will scan all songs   |  ❌  |
+| Downloader page | download a song just with youtube video url |  ❌  |
 
-First, you will need to start **Metro**, the JavaScript _bundler_ that ships _with_ React Native.
+# Libraries
 
-To start Metro, run the following command from the _root_ of your React Native project:
+- [react-native-unistyles](https://github.com/jpudysz/react-native-unistyles)
+- [lucide-icons](https://lucide.dev/guide/installation)
+- [react-native-track-player](https://github.com/doublesymmetry/react-native-track-player)
+- [react-native-fs](https://github.com/itinance/react-native-fs)
+- [react-navigation](https://github.com/react-navigation/react-navigation)
+- [ffmpeg-kit-react-native](https://github.com/arthenica/ffmpeg-kit)
+- [react-native-slider](https://github.com/callstack/react-native-slider)
+- [minimatch](https://github.com/isaacs/minimatch)
 
-```bash
-# using npm
-npm start
+# Design credits
 
-# OR using Yarn
-yarn start
-```
+App is based at this [design](https://www.figma.com/community/file/1217535322790191292) published by [Mohammad mahdi Babaei](https://www.figma.com/@mohammadteow).
 
-## Step 2: Start your Application
+# Contributors
 
-Let Metro Bundler run in its _own_ terminal. Open a _new_ terminal from the _root_ of your React Native project. Run the following command to start your _Android_ or _iOS_ app:
-
-### For Android
-
-```bash
-# using npm
-npm run android
-
-# OR using Yarn
-yarn android
-```
-
-### For iOS
-
-```bash
-# using npm
-npm run ios
-
-# OR using Yarn
-yarn ios
-```
-
-If everything is set up _correctly_, you should see your new app running in your _Android Emulator_ or _iOS Simulator_ shortly provided you have set up your emulator/simulator correctly.
-
-This is one way to run your app — you can also run it directly from within Android Studio and Xcode respectively.
-
-## Step 3: Modifying your App
-
-Now that you have successfully run the app, let's modify it.
-
-1. Open `App.tsx` in your text editor of choice and edit some lines.
-2. For **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Developer Menu** (<kbd>Ctrl</kbd> + <kbd>M</kbd> (on Window and Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (on macOS)) to see your changes!
-
-   For **iOS**: Hit <kbd>Cmd ⌘</kbd> + <kbd>R</kbd> in your iOS Simulator to reload the app and see your changes!
-
-## Congratulations! :tada:
-
-You've successfully run and modified your React Native App. :partying_face:
-
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [Introduction to React Native](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you can't get this to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+<table><tbody><tr>
+	<td align="center" valign="top" width="11%">
+	<a href="https://github.com/Undead34">
+		<img src="https://github.com/Undead34.png?s=75" width="75" height="75"><br />
+		Gabriel Maizo
+	</a>
+</td></tr></tbody></table>

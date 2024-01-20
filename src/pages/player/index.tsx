@@ -31,7 +31,7 @@ const ARTIST_CHARACTERS_LIMIT = 15;
 
 export const PlayerPage = ({ navigation }: any) => {
   const { styles } = useStyles(stylesheet);
-  const { position, duration } = useProgress(1000);
+  const { position, duration } = useProgress();
   const sheetRef = useRef<BottomSheet>(null);
   const musicContext = useContext(MusicContext);
   const track = useActiveTrack();
@@ -56,7 +56,7 @@ export const PlayerPage = ({ navigation }: any) => {
   };
 
   const getPlaybackButton = () => {
-    const playingStates = ['playing', 'buffering', 'loading'];
+    const playingStates = ['playing', 'buffering', 'loading', 'ready'];
     if (state.state) {
       if (playingStates.includes(state.state)) {
         return <Pause strokeWidth={3} size={45} color={'#FFF'} />;
@@ -65,7 +65,7 @@ export const PlayerPage = ({ navigation }: any) => {
     }
   };
 
-  const snapPoints = useMemo(() => ['25%', '100%'], []);
+  const snapPoints = useMemo(() => ['25%', '90%'], []);
 
   const queueData = useMemo(() => {
     return musicContext?.queue;
@@ -125,7 +125,7 @@ export const PlayerPage = ({ navigation }: any) => {
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => {
-                sheetRef.current?.snapToPosition('100%');
+                sheetRef.current?.snapToPosition('90%');
               }}>
               <ListMusic strokeWidth={2} color={'#FFF'} size={25} />
             </TouchableOpacity>

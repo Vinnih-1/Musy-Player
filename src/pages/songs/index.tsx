@@ -1,4 +1,4 @@
-import React, { useContext, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { TextInput } from 'react-native';
 import { Header } from '../../components/header';
 import {
@@ -11,7 +11,6 @@ import {
 } from 'lucide-react-native';
 import { createStyleSheet, useStyles } from 'react-native-unistyles';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
-import { MusicContext } from '../../contexts/music-player-context';
 import { SongsNavigation } from '../songs/navigations/songs-navigation';
 import { ArtistsNavigation } from '../songs/navigations/artists-navigation';
 import { PlaylistNavigation } from '../songs/navigations/playlist-navigation';
@@ -19,21 +18,31 @@ import { AlbumsNavigation } from '../songs/navigations/albums-navigation';
 import { FolderNavigation } from '../songs/navigations/folder-navigation';
 import { Bottom } from '../../components/bottom';
 import { DrawerActions } from '@react-navigation/native';
-import TrackPlayer from 'react-native-track-player';
+import TrackPlayer, {
+  useActiveTrack,
+  usePlaybackState,
+} from 'react-native-track-player';
 
 const Tab = createMaterialTopTabNavigator();
 
 export const SongPage = ({ navigation, route }: any) => {
   const { styles, theme } = useStyles(stylesheet);
-  const musicContext = useContext(MusicContext);
   const [search, setSearch] = useState('');
   const searchRef = useRef<TextInput | null>(null);
+  const state = usePlaybackState();
+  const track = useActiveTrack();
 
-  if (!musicContext) {
-    return null;
-  }
+  const getPlaybackButton = () => {
+    const playingStates = ['playing', 'buffering', 'loading'];
+    if (state.state) {
+      if (playingStates.includes(state.state)) {
+        return <Pause strokeWidth={3} size={25} color={'#FFF'} />;
+      }
+      return <Play strokeWidth={3} size={25} color={'#FFF'} />;
+    }
+  };
 
-  if (musicContext.loading) {
+  if (!track?.artist || !track?.title) {
     return null;
   }
 
@@ -57,7 +66,6 @@ export const SongPage = ({ navigation, route }: any) => {
           style={styles.searchInput}
           onChangeText={text => {
             setSearch(text);
-            musicContext.setFilter(text);
           }}
         />
         <Header.Button
@@ -110,7 +118,7 @@ export const SongPage = ({ navigation, route }: any) => {
           options={{ tabBarLabel: 'Folder' }}
         />
       </Tab.Navigator>
-      {musicContext.selected.title !== '' && (
+      {track && (
         <Bottom.Root
           onClick={() => {
             navigation.navigate('Player');
@@ -118,35 +126,34 @@ export const SongPage = ({ navigation, route }: any) => {
           <Bottom.Container>
             <Bottom.Image />
             <Bottom.Details
-              artist={musicContext.selected.artist}
-              title={musicContext.selected.title}
-              url={musicContext.selected.url}
+              artist={track.artist}
+              title={track.title}
+              url={track.url}
             />
           </Bottom.Container>
           <Bottom.Container style={styles.bottomButtonContainer}>
             <Bottom.Button
               onClick={() => {
-                musicContext.previous();
+                TrackPlayer.skipToPrevious();
               }}>
               <SkipBack strokeWidth={5} size={25} color={'#FFF'} />
             </Bottom.Button>
             <Bottom.Button
               onClick={() => {
-                if (musicContext.playing) {
-                  TrackPlayer.stop();
-                } else {
-                  TrackPlayer.play();
+                switch (state.state) {
+                  case 'playing':
+                    TrackPlayer.pause();
+                    break;
+                  case 'paused':
+                    TrackPlayer.play();
+                    break;
                 }
               }}>
-              {musicContext.playing ? (
-                <Pause strokeWidth={5} size={25} color={'#FFF'} />
-              ) : (
-                <Play strokeWidth={5} size={25} color={'#FFF'} />
-              )}
+              {getPlaybackButton()}
             </Bottom.Button>
             <Bottom.Button
               onClick={() => {
-                musicContext.next();
+                TrackPlayer.skipToNext();
               }}>
               <SkipForward strokeWidth={5} size={25} color={'#FFF'} />
             </Bottom.Button>

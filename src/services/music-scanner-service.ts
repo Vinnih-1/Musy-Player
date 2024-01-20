@@ -3,9 +3,9 @@ import { minimatch } from 'minimatch';
 import { FFprobeKit } from 'ffmpeg-kit-react-native';
 
 export interface MusicProps {
-  url: string;
-  title: string;
   artist: string;
+  title: string;
+  url: string;
 }
 
 export const musicScanner = async (): Promise<MusicProps[] | undefined> => {
@@ -28,7 +28,6 @@ export const musicScanner = async (): Promise<MusicProps[] | undefined> => {
         try {
           const session = await FFprobeKit.getMediaInformation(music.path);
           const information = await session.getMediaInformation();
-
           if (information) {
             const tags = information.getTags();
             return {
@@ -41,7 +40,11 @@ export const musicScanner = async (): Promise<MusicProps[] | undefined> => {
             } as MusicProps;
           }
         } catch (error) {
-          return undefined;
+          return {
+            url: music.path,
+            title: music.name.replace(/\.[^.]+$/, ''),
+            artist: 'Unknown Artist',
+          } as MusicProps;
         }
       });
 

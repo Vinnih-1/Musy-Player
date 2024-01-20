@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import { Image, Text, View } from 'react-native';
 import { createStyleSheet, useStyles } from 'react-native-unistyles';
 import {
@@ -15,40 +15,47 @@ import {
   Github,
 } from 'lucide-react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
-import { MusicContext } from '../../contexts/music-player-context';
 import Slider from '@react-native-community/slider';
-import TrackPlayer from 'react-native-track-player';
+import TrackPlayer, {
+  useActiveTrack,
+  usePlaybackState,
+  useProgress,
+} from 'react-native-track-player';
 
 export const PlayerPage = ({ navigation }: any) => {
   const TITLE_CHARACTERS_LIMIT = 60;
   const ARTIST_CHARACTERS_LIMIT = 15;
   const { styles } = useStyles(stylesheet);
-  const musicContext = useContext(MusicContext);
-
-  if (!musicContext) {
-    return null;
-  }
+  const { position, duration } = useProgress(1000);
+  const track = useActiveTrack();
+  const state = usePlaybackState();
 
   const getPosition = (): string => {
-    const selected = musicContext.selected;
-    const positionSeconds = Math.floor(selected.position);
-    const position = `${Math.floor(positionSeconds / 60)}:${(
-      Math.floor(positionSeconds) % 60
+    const positionString = `${Math.floor(position / 60)}:${(
+      Math.floor(position) % 60
     )
       .toString()
       .padStart(2, '0')}`;
-    return position;
+    return positionString;
   };
 
   const getDuration = (): string => {
-    const selected = musicContext.selected;
-    const durationSeconds = Math.floor(selected.duration);
-    const position = `${Math.floor(durationSeconds / 60)}:${(
-      Math.floor(durationSeconds) % 60
+    const durationString = `${Math.floor(duration / 60)}:${(
+      Math.floor(duration) % 60
     )
       .toString()
       .padStart(2, '0')}`;
-    return position;
+    return durationString;
+  };
+
+  const getPlaybackButton = () => {
+    const playingStates = ['playing', 'buffering', 'loading'];
+    if (state.state) {
+      if (playingStates.includes(state.state)) {
+        return <Pause strokeWidth={3} size={45} color={'#FFF'} />;
+      }
+      return <Play strokeWidth={3} size={45} color={'#FFF'} />;
+    }
   };
 
   return (
@@ -72,13 +79,14 @@ export const PlayerPage = ({ navigation }: any) => {
         <View style={styles.content}>
           <View style={styles.body}>
             <Text style={styles.title}>
-              {musicContext.selected.title.substring(0, TITLE_CHARACTERS_LIMIT)}
+              {track &&
+                track.title &&
+                track.title.substring(0, TITLE_CHARACTERS_LIMIT)}
             </Text>
             <Text style={styles.text}>
-              {musicContext.selected.artist.substring(
-                0,
-                ARTIST_CHARACTERS_LIMIT,
-              )}
+              {track &&
+                track.artist &&
+                track.artist.substring(0, ARTIST_CHARACTERS_LIMIT)}
             </Text>
           </View>
           <View style={styles.buttons}>
@@ -105,10 +113,10 @@ export const PlayerPage = ({ navigation }: any) => {
               maximumTrackTintColor="#1A1A1A"
               thumbTintColor="#ECECEC"
               minimumValue={0}
-              maximumValue={Math.floor(musicContext.selected.duration)}
-              value={Math.floor(musicContext.selected.position)}
-              onValueChange={position => {
-                TrackPlayer.seekTo(Math.floor(position));
+              maximumValue={Math.floor(duration)}
+              value={Math.floor(position)}
+              onSlidingComplete={value => {
+                TrackPlayer.seekTo(Math.floor(value));
               }}
             />
             <View style={styles.timer}>
@@ -119,27 +127,26 @@ export const PlayerPage = ({ navigation }: any) => {
           <View style={styles.player}>
             <TouchableOpacity
               onPress={() => {
-                musicContext.previous();
+                TrackPlayer.skipToPrevious();
               }}>
               <SkipBack strokeWidth={3} size={45} color={'#FFF'} />
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => {
-                if (musicContext.playing) {
-                  TrackPlayer.stop();
-                } else {
-                  TrackPlayer.play();
+                switch (state.state) {
+                  case 'playing':
+                    TrackPlayer.pause();
+                    break;
+                  case 'paused':
+                    TrackPlayer.play();
+                    break;
                 }
               }}>
-              {musicContext.playing ? (
-                <Pause strokeWidth={3} size={45} color={'#FFF'} />
-              ) : (
-                <Play strokeWidth={3} size={45} color={'#FFF'} />
-              )}
+              {getPlaybackButton()}
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => {
-                musicContext.next();
+                TrackPlayer.skipToNext();
               }}>
               <SkipForward strokeWidth={3} size={45} color={'#FFF'} />
             </TouchableOpacity>

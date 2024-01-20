@@ -1,66 +1,22 @@
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext } from 'react';
 import { createStyleSheet, useStyles } from 'react-native-unistyles';
 import { MusicContext } from '../../../contexts/music-player-context';
-import { MusicProps } from '../../../services/music-scanner-service';
-import { SafeAreaView, ScrollView, Text } from 'react-native';
+import { SafeAreaView, ScrollView, Text, View } from 'react-native';
 import { Song } from '../../../components/song';
-import { ArchiveX, FileAudio } from 'lucide-react-native';
+import { FileAudio } from 'lucide-react-native';
+import { useActiveTrack } from 'react-native-track-player';
 
 export const SongsNavigation = () => {
   const { styles } = useStyles(stylesheet);
   const musicContext = useContext(MusicContext);
-  const [filtered, setFiltered] = useState<MusicProps[]>([]);
-  useEffect(() => {
-    if (musicContext && musicContext.titleFilter !== '') {
-      setFiltered(
-        musicContext.musics.filter(music =>
-          music.title
-            .toLowerCase()
-            .includes(musicContext.titleFilter.toLowerCase()),
-        ),
-      );
-    }
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [musicContext?.titleFilter]);
+  const track = useActiveTrack();
 
   if (!musicContext) {
     return null;
   }
 
-  if (musicContext.titleFilter !== '') {
-    return (
-      <ScrollView style={styles.content}>
-        {filtered.length ? (
-          filtered.map((music, index) => (
-            <Song.Root
-              key={index}
-              onClick={() => {
-                const selected = musicContext.musics.slice(
-                  index,
-                  musicContext.musics.length,
-                );
-                musicContext.setSelected(music);
-                musicContext.setQueue(selected);
-              }}>
-              <Song.Image />
-              <Song.Details
-                name={music.title}
-                artist={music.artist}
-                isPlaying={musicContext.selected.url.includes(music.url)}
-              />
-            </Song.Root>
-          ))
-        ) : (
-          <SafeAreaView style={styles.warnScreen}>
-            <ArchiveX color={'#FFF'} strokeWidth={2} size={150} />
-            <Text style={styles.typrography}>
-              We couldn't find any songs with this name
-            </Text>
-          </SafeAreaView>
-        )}
-      </ScrollView>
-    );
+  if (musicContext.loading) {
+    return <View style={styles.loading} />;
   }
 
   return (
@@ -74,14 +30,13 @@ export const SongsNavigation = () => {
                 index,
                 musicContext.musics.length,
               );
-              musicContext.setSelected(music);
               musicContext.setQueue(selected);
             }}>
             <Song.Image />
             <Song.Details
               name={music.title}
               artist={music.artist}
-              isPlaying={musicContext.selected.url.includes(music.url)}
+              isPlaying={track && track.url === music.url ? true : false}
             />
           </Song.Root>
         ))
@@ -100,6 +55,11 @@ export const SongsNavigation = () => {
 const stylesheet = createStyleSheet(theme => ({
   content: {
     backgroundColor: theme.colors.background,
+  },
+  loading: {
+    backgroundColor: theme.colors.background,
+    flex: 1,
+    width: '100%',
   },
   searchInput: {
     maxWidth: 100,

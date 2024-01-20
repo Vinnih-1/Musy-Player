@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback, useContext, useMemo, useRef } from 'react';
 import { Image, Text, View } from 'react-native';
 import { createStyleSheet, useStyles } from 'react-native-unistyles';
 import {
@@ -21,12 +21,19 @@ import TrackPlayer, {
   usePlaybackState,
   useProgress,
 } from 'react-native-track-player';
+import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet';
+import { MusicContext } from '../../contexts/music-player-context';
+import { Song } from '../../components/song';
+import { MusicProps } from '../../services/music-scanner-service';
+
+const TITLE_CHARACTERS_LIMIT = 60;
+const ARTIST_CHARACTERS_LIMIT = 15;
 
 export const PlayerPage = ({ navigation }: any) => {
-  const TITLE_CHARACTERS_LIMIT = 60;
-  const ARTIST_CHARACTERS_LIMIT = 15;
   const { styles } = useStyles(stylesheet);
   const { position, duration } = useProgress(1000);
+  const sheetRef = useRef<BottomSheet>(null);
+  const musicContext = useContext(MusicContext);
   const track = useActiveTrack();
   const state = usePlaybackState();
 
@@ -57,6 +64,29 @@ export const PlayerPage = ({ navigation }: any) => {
       return <Play strokeWidth={3} size={45} color={'#FFF'} />;
     }
   };
+
+  const snapPoints = useMemo(() => ['25%', '100%'], []);
+
+  const queueData = useMemo(() => {
+    return musicContext?.queue;
+  }, [musicContext?.queue]);
+
+  const renderQueueMusics = useCallback((music: MusicProps, index: number) => {
+    return (
+      <Song.Root
+        key={index}
+        onClick={() => {
+          TrackPlayer.skip(index);
+        }}>
+        <Song.Image />
+        <Song.Details
+          name={music.title}
+          artist={music.artist}
+          isPlaying={false}
+        />
+      </Song.Root>
+    );
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -93,7 +123,10 @@ export const PlayerPage = ({ navigation }: any) => {
             <TouchableOpacity>
               <Volume2 strokeWidth={2} color={'#FFF'} size={25} />
             </TouchableOpacity>
-            <TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => {
+                sheetRef.current?.snapToPosition('100%');
+              }}>
               <ListMusic strokeWidth={2} color={'#FFF'} size={25} />
             </TouchableOpacity>
             <TouchableOpacity>
@@ -153,6 +186,15 @@ export const PlayerPage = ({ navigation }: any) => {
           </View>
         </View>
       </View>
+      <BottomSheet
+        ref={sheetRef}
+        snapPoints={snapPoints}
+        backgroundStyle={styles.sheetStyleContainer}
+        handleIndicatorStyle={styles.sheetIndicatorStyle}>
+        <BottomSheetScrollView>
+          {queueData?.map((music, index) => renderQueueMusics(music, index))}
+        </BottomSheetScrollView>
+      </BottomSheet>
     </View>
   );
 };
@@ -208,5 +250,11 @@ const stylesheet = createStyleSheet(theme => ({
     justifyContent: 'center',
     marginTop: 40,
     gap: 20,
+  },
+  sheetStyleContainer: {
+    backgroundColor: theme.colors.bottom,
+  },
+  sheetIndicatorStyle: {
+    backgroundColor: theme.colors.white,
   },
 }));

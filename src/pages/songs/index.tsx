@@ -42,10 +42,6 @@ export const SongPage = ({ navigation, route }: any) => {
     }
   };
 
-  if (!track?.artist || !track?.title) {
-    return null;
-  }
-
   return (
     <>
       <Header.Root>
@@ -118,7 +114,7 @@ export const SongPage = ({ navigation, route }: any) => {
           options={{ tabBarLabel: 'Folder' }}
         />
       </Tab.Navigator>
-      {track && (
+      {track && track.title && track.artist && (
         <Bottom.Root
           onClick={() => {
             navigation.navigate('Player');

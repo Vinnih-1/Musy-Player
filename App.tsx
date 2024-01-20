@@ -9,10 +9,17 @@ import { useStyles } from 'react-native-unistyles';
 import TrackPlayer, {
   AndroidAudioContentType,
   AppKilledPlaybackBehavior,
+  Capability,
 } from 'react-native-track-player';
 
 function App(): React.JSX.Element {
   const { theme } = useStyles();
+  const capabilities = [
+    Capability.Play,
+    Capability.Pause,
+    Capability.SkipToNext,
+    Capability.SkipToPrevious,
+  ];
 
   TrackPlayer.setupPlayer({
     androidAudioContentType: AndroidAudioContentType.Music,
@@ -22,7 +29,8 @@ function App(): React.JSX.Element {
         android: {
           appKilledPlaybackBehavior: AppKilledPlaybackBehavior.ContinuePlayback,
         },
-        progressUpdateEventInterval: 1,
+        capabilities: capabilities,
+        compactCapabilities: capabilities,
       });
     })
     .catch(() => {

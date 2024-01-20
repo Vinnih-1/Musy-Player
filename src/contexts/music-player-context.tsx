@@ -70,42 +70,8 @@ const MusicProvider = ({ children }: MusicPropsProvider) => {
       },
     );
 
-    const stateEvent = TrackPlayer.addEventListener(
-      Event.PlaybackState,
-      event => {
-        setTracker(prevState => ({
-          ...prevState,
-          state: event.state.toLowerCase(),
-        }));
-      },
-    );
-
-    const trackChange = TrackPlayer.addEventListener(
-      Event.PlaybackTrackChanged,
-      async event => {
-        const trackIndex = event.nextTrack;
-        const track = await TrackPlayer.getTrack(trackIndex);
-
-        if (track) {
-          setTracker(prevState => ({
-            ...prevState,
-            selected: {
-              artist: track.artist ?? '',
-              title: track.title ?? '',
-              url: track.url,
-              playing: true,
-              duration: 0,
-              position: 0,
-            },
-          }));
-        }
-      },
-    );
-
     return () => {
       queueEvent.remove();
-      stateEvent.remove();
-      trackChange.remove();
     };
   }, [tracker.queue]);
 

@@ -9,7 +9,7 @@ My music app created with React Native (without Expo). This app is being created
 | Task          | Description                                   | Done |
 |---------------|-----------------------------------------------|------|
 | Mute button     | mute and unmute at the Player page          |  ❌  |
-| Queue button    | open bottom sheet that contains queue musics|  ❌  |
+| Queue button    | open bottom sheet that contains queue musics|  ✅  |
 | Shuffle button  | shuffle queue musics                        |  ❌  |
 | Repeat button   | set repeat mode (OFF, TRACK and QUEUE)      |  ❌  |
 | Like button     | save current song in a liked playlist       |  ❌  |

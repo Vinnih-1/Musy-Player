@@ -1,12 +1,6 @@
-import React, {
-  ReactNode,
-  createContext,
-  useCallback,
-  useEffect,
-  useState,
-} from 'react';
+import React, { ReactNode, createContext, useEffect, useState } from 'react';
 import { MusicProps, musicScanner } from '../services/music-scanner-service';
-import TrackPlayer, { Event } from 'react-native-track-player';
+import TrackPlayer from 'react-native-track-player';
 
 export const MusicContext = createContext<TrackerProps | undefined>(undefined);
 
@@ -16,25 +10,23 @@ interface MusicPropsProvider {
 
 interface TrackerProps {
   musics: MusicProps[];
-  queue: MusicProps[];
+  search?: string;
   loading: boolean;
-
-  setQueue: (queue: MusicProps[]) => void;
+  setSearch: (search: string) => void;
 }
 
 const MusicProvider = ({ children }: MusicPropsProvider) => {
-  const setQueue = useCallback((queue: MusicProps[]) => {
+  const setSearch = (search: string) => {
     setTracker(prevState => ({
       ...prevState,
-      queue: queue,
+      search: search,
     }));
-  }, []);
+  };
 
   const [tracker, setTracker] = useState<TrackerProps>({
     musics: [],
-    queue: [],
-    setQueue,
     loading: true,
+    setSearch,
   });
 
   useEffect(() => {
@@ -44,36 +36,13 @@ const MusicProvider = ({ children }: MusicPropsProvider) => {
           setTracker(prevState => ({
             ...prevState,
             musics: scannedMusics,
+            loading: false,
           }));
+          TrackPlayer.setQueue(scannedMusics);
         }
-        setTracker(prevState => ({
-          ...prevState,
-          loading: false,
-        }));
       })
       .catch(error => console.log(error));
   }, []);
-
-  useEffect(() => {
-    if (tracker.queue.length) {
-      TrackPlayer.setQueue(tracker.queue).then(() => TrackPlayer.play());
-    }
-
-    const queueEvent = TrackPlayer.addEventListener(
-      Event.PlaybackQueueEnded,
-      () => {
-        setTracker(prevState => ({
-          ...prevState,
-          queue: [],
-          selected: undefined,
-        }));
-      },
-    );
-
-    return () => {
-      queueEvent.remove();
-    };
-  }, [tracker.queue]);
 
   return (
     <MusicContext.Provider value={tracker}>{children}</MusicContext.Provider>

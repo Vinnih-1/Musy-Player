@@ -1,4 +1,10 @@
-import React, { useCallback, useContext, useMemo, useRef } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { Image, Text, View } from 'react-native';
 import { createStyleSheet, useStyles } from 'react-native-unistyles';
 import {
@@ -17,14 +23,13 @@ import {
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import Slider from '@react-native-community/slider';
 import TrackPlayer, {
+  Track,
   useActiveTrack,
   usePlaybackState,
   useProgress,
 } from 'react-native-track-player';
 import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet';
-import { MusicContext } from '../../contexts/music-player-context';
 import { Song } from '../../components/song';
-import { MusicProps } from '../../services/music-scanner-service';
 
 const TITLE_CHARACTERS_LIMIT = 60;
 const ARTIST_CHARACTERS_LIMIT = 15;
@@ -32,8 +37,8 @@ const ARTIST_CHARACTERS_LIMIT = 15;
 export const PlayerPage = ({ navigation }: any) => {
   const { styles } = useStyles(stylesheet);
   const { position, duration } = useProgress();
+  const [queue, setQueue] = useState<Track[]>();
   const sheetRef = useRef<BottomSheet>(null);
-  const musicContext = useContext(MusicContext);
   const track = useActiveTrack();
   const state = usePlaybackState();
 
@@ -55,6 +60,12 @@ export const PlayerPage = ({ navigation }: any) => {
     return durationString;
   };
 
+  useEffect(() => {
+    if (track) {
+      TrackPlayer.getQueue().then(trackQueue => setQueue(trackQueue));
+    }
+  }, [track]);
+
   const getPlaybackButton = () => {
     const playingStates = ['playing', 'buffering', 'loading', 'ready'];
     if (state.state) {
@@ -67,11 +78,7 @@ export const PlayerPage = ({ navigation }: any) => {
 
   const snapPoints = useMemo(() => ['25%', '90%'], []);
 
-  const queueData = useMemo(() => {
-    return musicContext?.queue;
-  }, [musicContext?.queue]);
-
-  const renderQueueMusics = useCallback((music: MusicProps, index: number) => {
+  const renderQueueMusics = useCallback((music: Track, index: number) => {
     return (
       <Song.Root
         key={index}
@@ -80,8 +87,8 @@ export const PlayerPage = ({ navigation }: any) => {
         }}>
         <Song.Image />
         <Song.Details
-          name={music.title}
-          artist={music.artist}
+          name={music.title ?? ''}
+          artist={music.artist ?? ''}
           isPlaying={false}
         />
       </Song.Root>
@@ -192,7 +199,8 @@ export const PlayerPage = ({ navigation }: any) => {
         backgroundStyle={styles.sheetStyleContainer}
         handleIndicatorStyle={styles.sheetIndicatorStyle}>
         <BottomSheetScrollView>
-          {queueData?.map((music, index) => renderQueueMusics(music, index))}
+          {queue &&
+            queue.map((music, index) => renderQueueMusics(music, index))}
         </BottomSheetScrollView>
       </BottomSheet>
     </View>

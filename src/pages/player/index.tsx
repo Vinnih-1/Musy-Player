@@ -20,6 +20,7 @@ import {
   Volume2,
   Github,
   Repeat1,
+  VolumeX,
 } from 'lucide-react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import Slider from '@react-native-community/slider';
@@ -76,9 +77,11 @@ export const PlayerPage = ({ navigation }: any) => {
   }, [track]);
 
   useEffect(() => {
-    setRepeatMode(getRepeatModeByIndex(storage.getNumber('repeatMode') ?? 0));
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const isMuted = storage.getBoolean('isMuted') ?? false;
+    const repeatMode = getRepeatModeByIndex(
+      storage.getNumber('repeatMode') ?? 0,
+    );
+    updatePlayerProps({ repeatMode: repeatMode, isMuted: isMuted });
   }, []);
 
   const getPlaybackButton = () => {
@@ -88,6 +91,33 @@ export const PlayerPage = ({ navigation }: any) => {
         return <Pause strokeWidth={3} size={45} color={'#FFF'} />;
       }
       return <Play strokeWidth={3} size={45} color={'#FFF'} />;
+    }
+  };
+
+  const renderRepeatModeButton = () => {
+    if (!player) {
+      return null;
+    }
+
+    switch (player.repeatMode) {
+      case RepeatMode.Queue:
+        return <Repeat strokeWidth={2} color={'#FFF'} size={25} />;
+      case RepeatMode.Track:
+        return <Repeat1 strokeWidth={2} color={'#FFF'} size={25} />;
+      default:
+        return <Repeat strokeWidth={2} color={'#71717a'} size={25} />;
+    }
+  };
+
+  const renderMuteButton = () => {
+    if (!player) {
+      return null;
+    }
+
+    if (player.isMuted) {
+      return <VolumeX strokeWidth={2} color={'#FFF'} size={25} />;
+    } else {
+      return <Volume2 strokeWidth={2} color={'#FFF'} size={25} />;
     }
   };
 
@@ -110,30 +140,22 @@ export const PlayerPage = ({ navigation }: any) => {
     );
   }, []);
 
-  const renderRepeatModeButton = () => {
-    if (!player) {
-      return null;
-    }
-
-    switch (player.repeatMode) {
-      case RepeatMode.Queue:
-        return <Repeat strokeWidth={2} color={'#FFF'} size={25} />;
-      case RepeatMode.Track:
-        return <Repeat1 strokeWidth={2} color={'#FFF'} size={25} />;
-      default:
-        return <Repeat strokeWidth={2} color={'#71717a'} size={25} />;
-    }
-  };
-
-  const setRepeatMode = (repeatMode: RepeatMode) => {
+  const updatePlayerProps = (props: PlayerProps) => {
     setPlayer({
-      repeatMode: repeatMode,
-      isMuted: player ? player.isMuted : false,
+      repeatMode: props.repeatMode,
+      isMuted: props.isMuted,
     });
 
-    TrackPlayer.setRepeatMode(repeatMode).then(() =>
-      storage.set('repeatMode', repeatMode.valueOf()),
-    );
+    if (props.isMuted) {
+      TrackPlayer.setVolume(0);
+    } else {
+      TrackPlayer.setVolume(1);
+    }
+
+    TrackPlayer.setRepeatMode(props.repeatMode).then(() => {
+      storage.set('repeatMode', props.repeatMode.valueOf());
+      storage.set('isMuted', props.isMuted);
+    });
   };
 
   const getRepeatModeByIndex = (index: number): RepeatMode => {
@@ -185,8 +207,16 @@ export const PlayerPage = ({ navigation }: any) => {
             </Text>
           </View>
           <View style={styles.buttons}>
-            <TouchableOpacity>
-              <Volume2 strokeWidth={2} color={'#FFF'} size={25} />
+            <TouchableOpacity
+              onPress={() => {
+                if (player) {
+                  updatePlayerProps({
+                    isMuted: !player.isMuted,
+                    repeatMode: player.repeatMode,
+                  });
+                }
+              }}>
+              {renderMuteButton()}
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => {
@@ -200,9 +230,12 @@ export const PlayerPage = ({ navigation }: any) => {
             <TouchableOpacity
               onPress={() => {
                 if (player) {
-                  setRepeatMode(
-                    getRepeatModeByIndex(player.repeatMode.valueOf() + 1),
-                  );
+                  updatePlayerProps({
+                    repeatMode: getRepeatModeByIndex(
+                      player.repeatMode.valueOf() + 1,
+                    ),
+                    isMuted: player.isMuted,
+                  });
                 }
               }}>
               {renderRepeatModeButton()}

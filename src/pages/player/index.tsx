@@ -5,7 +5,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { Image, Text, View } from 'react-native';
+import { Image, Linking, Text, View } from 'react-native';
 import { createStyleSheet, useStyles } from 'react-native-unistyles';
 import {
   ChevronDown,
@@ -142,7 +142,11 @@ export const PlayerPage = ({ navigation }: any) => {
           <ChevronDown strokeWidth={3} color={'#FFF'} size={30} />
         </TouchableOpacity>
         <Text style={styles.title}>Musy Player</Text>
-        <TouchableOpacity activeOpacity={0.8}>
+        <TouchableOpacity
+          activeOpacity={0.8}
+          onPress={() => {
+            Linking.openURL('https://github.com/Vinnih-1');
+          }}>
           <Github strokeWidth={3} color={'#FFF'} size={30} />
         </TouchableOpacity>
       </View>

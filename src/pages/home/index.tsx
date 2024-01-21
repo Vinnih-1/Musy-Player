@@ -18,17 +18,27 @@ export const Home = () => {
   const [loading, setLoading] = useState(true);
 
   const READ_EXTERNAL_STORAGE = 'android.permission.READ_EXTERNAL_STORAGE';
+  const WRITE_EXTERNAL_STORAGE = 'android.permission.WRITE_EXTERNAL_STORAGE';
 
-  PermissionsAndroid.check(READ_EXTERNAL_STORAGE)
-    .then(result => {
-      setPermissionGranted(result);
-    })
-    .finally(() => setLoading(false));
+  PermissionsAndroid.check(READ_EXTERNAL_STORAGE).then(read => {
+    if (read) {
+      PermissionsAndroid.check(WRITE_EXTERNAL_STORAGE)
+        .then(write => {
+          setPermissionGranted(write);
+        })
+        .finally(() => setLoading(false));
+    } else {
+      setLoading(false);
+    }
+  });
 
   const handlePermissionsRequest = () => {
-    PermissionsAndroid.request(READ_EXTERNAL_STORAGE).then(result => {
+    PermissionsAndroid.requestMultiple([
+      READ_EXTERNAL_STORAGE,
+      WRITE_EXTERNAL_STORAGE,
+    ]).then(result => {
       console.log(result);
-      if (result === 'granted') {
+      if (result[READ_EXTERNAL_STORAGE] && result[WRITE_EXTERNAL_STORAGE]) {
         setPermissionGranted(true);
       }
     });

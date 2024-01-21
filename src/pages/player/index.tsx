@@ -37,6 +37,11 @@ import { storage } from '../../../App';
 const TITLE_CHARACTERS_LIMIT = 60;
 const ARTIST_CHARACTERS_LIMIT = 15;
 
+interface PlayerProps {
+  repeatMode: RepeatMode;
+  isMuted: boolean;
+}
+
 export const PlayerPage = ({ navigation }: any) => {
   const { styles } = useStyles(stylesheet);
   const { position, duration } = useProgress();
@@ -44,7 +49,7 @@ export const PlayerPage = ({ navigation }: any) => {
   const sheetRef = useRef<BottomSheet>(null);
   const track = useActiveTrack();
   const state = usePlaybackState();
-  const [repeatMode, setRepeatMode] = useState<RepeatMode>();
+  const [player, setPlayer] = useState<PlayerProps>();
 
   const getPosition = (): string => {
     const positionString = `${Math.floor(position / 60)}:${(
@@ -71,14 +76,10 @@ export const PlayerPage = ({ navigation }: any) => {
   }, [track]);
 
   useEffect(() => {
-    if (!repeatMode) {
-      setRepeatMode(RepeatMode.Off);
-    } else {
-      TrackPlayer.setRepeatMode(repeatMode).then(() =>
-        storage.set('repeatMode', repeatMode.toString()),
-      );
-    }
-  }, [repeatMode]);
+    setRepeatMode(getRepeatModeByIndex(storage.getNumber('repeatMode') ?? 0));
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const getPlaybackButton = () => {
     const playingStates = ['playing', 'buffering', 'loading', 'ready'];
@@ -110,7 +111,11 @@ export const PlayerPage = ({ navigation }: any) => {
   }, []);
 
   const renderRepeatModeButton = () => {
-    switch (repeatMode) {
+    if (!player) {
+      return null;
+    }
+
+    switch (player.repeatMode) {
       case RepeatMode.Queue:
         return <Repeat strokeWidth={2} color={'#FFF'} size={25} />;
       case RepeatMode.Track:
@@ -120,16 +125,27 @@ export const PlayerPage = ({ navigation }: any) => {
     }
   };
 
-  const handleRepeatButton = () => {
-    switch (repeatMode) {
-      case RepeatMode.Queue:
-        setRepeatMode(RepeatMode.Track);
-        break;
-      case RepeatMode.Track:
-        setRepeatMode(RepeatMode.Off);
-        break;
+  const setRepeatMode = (repeatMode: RepeatMode) => {
+    setPlayer({
+      repeatMode: repeatMode,
+      isMuted: player ? player.isMuted : false,
+    });
+
+    TrackPlayer.setRepeatMode(repeatMode).then(() =>
+      storage.set('repeatMode', repeatMode.valueOf()),
+    );
+  };
+
+  const getRepeatModeByIndex = (index: number): RepeatMode => {
+    switch (index) {
+      case 0:
+        return RepeatMode.Off;
+      case 1:
+        return RepeatMode.Track;
+      case 2:
+        return RepeatMode.Queue;
       default:
-        setRepeatMode(RepeatMode.Queue);
+        return RepeatMode.Off;
     }
   };
 
@@ -181,7 +197,14 @@ export const PlayerPage = ({ navigation }: any) => {
             <TouchableOpacity>
               <Shuffle strokeWidth={2} color={'#FFF'} size={25} />
             </TouchableOpacity>
-            <TouchableOpacity onPress={handleRepeatButton}>
+            <TouchableOpacity
+              onPress={() => {
+                if (player) {
+                  setRepeatMode(
+                    getRepeatModeByIndex(player.repeatMode.valueOf() + 1),
+                  );
+                }
+              }}>
               {renderRepeatModeButton()}
             </TouchableOpacity>
             <TouchableOpacity>

@@ -19,10 +19,12 @@ import {
   SkipForward,
   Volume2,
   Github,
+  Repeat1,
 } from 'lucide-react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import Slider from '@react-native-community/slider';
 import TrackPlayer, {
+  RepeatMode,
   Track,
   useActiveTrack,
   usePlaybackState,
@@ -30,6 +32,7 @@ import TrackPlayer, {
 } from 'react-native-track-player';
 import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { Song } from '../../components/song';
+import { storage } from '../../../App';
 
 const TITLE_CHARACTERS_LIMIT = 60;
 const ARTIST_CHARACTERS_LIMIT = 15;
@@ -41,6 +44,7 @@ export const PlayerPage = ({ navigation }: any) => {
   const sheetRef = useRef<BottomSheet>(null);
   const track = useActiveTrack();
   const state = usePlaybackState();
+  const [repeatMode, setRepeatMode] = useState<RepeatMode>();
 
   const getPosition = (): string => {
     const positionString = `${Math.floor(position / 60)}:${(
@@ -65,6 +69,16 @@ export const PlayerPage = ({ navigation }: any) => {
       TrackPlayer.getQueue().then(trackQueue => setQueue(trackQueue));
     }
   }, [track]);
+
+  useEffect(() => {
+    if (!repeatMode) {
+      setRepeatMode(RepeatMode.Off);
+    } else {
+      TrackPlayer.setRepeatMode(repeatMode).then(() =>
+        storage.set('repeatMode', repeatMode.toString()),
+      );
+    }
+  }, [repeatMode]);
 
   const getPlaybackButton = () => {
     const playingStates = ['playing', 'buffering', 'loading', 'ready'];
@@ -94,6 +108,30 @@ export const PlayerPage = ({ navigation }: any) => {
       </Song.Root>
     );
   }, []);
+
+  const renderRepeatModeButton = () => {
+    switch (repeatMode) {
+      case RepeatMode.Queue:
+        return <Repeat strokeWidth={2} color={'#FFF'} size={25} />;
+      case RepeatMode.Track:
+        return <Repeat1 strokeWidth={2} color={'#FFF'} size={25} />;
+      default:
+        return <Repeat strokeWidth={2} color={'#71717a'} size={25} />;
+    }
+  };
+
+  const handleRepeatButton = () => {
+    switch (repeatMode) {
+      case RepeatMode.Queue:
+        setRepeatMode(RepeatMode.Track);
+        break;
+      case RepeatMode.Track:
+        setRepeatMode(RepeatMode.Off);
+        break;
+      default:
+        setRepeatMode(RepeatMode.Queue);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -139,8 +177,8 @@ export const PlayerPage = ({ navigation }: any) => {
             <TouchableOpacity>
               <Shuffle strokeWidth={2} color={'#FFF'} size={25} />
             </TouchableOpacity>
-            <TouchableOpacity>
-              <Repeat strokeWidth={2} color={'#FFF'} size={25} />
+            <TouchableOpacity onPress={handleRepeatButton}>
+              {renderRepeatModeButton()}
             </TouchableOpacity>
             <TouchableOpacity>
               <Heart strokeWidth={2} color={'#FFF'} size={25} />

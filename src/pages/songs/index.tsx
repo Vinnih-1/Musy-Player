@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { TextInput } from 'react-native';
 import { Header } from '../../components/header';
 import {
@@ -22,18 +22,20 @@ import TrackPlayer, {
   useActiveTrack,
   usePlaybackState,
 } from 'react-native-track-player';
+import { MusicContext } from '../../contexts/music-player-context';
 
 const Tab = createMaterialTopTabNavigator();
 
 export const SongPage = ({ navigation, route }: any) => {
   const { styles, theme } = useStyles(stylesheet);
   const [search, setSearch] = useState('');
+  const musicContext = useContext(MusicContext);
   const searchRef = useRef<TextInput | null>(null);
   const state = usePlaybackState();
   const track = useActiveTrack();
 
   const getPlaybackButton = () => {
-    const playingStates = ['playing', 'buffering', 'loading'];
+    const playingStates = ['playing', 'buffering', 'loading', 'ready'];
     if (state.state) {
       if (playingStates.includes(state.state)) {
         return <Pause strokeWidth={3} size={25} color={'#FFF'} />;
@@ -41,6 +43,12 @@ export const SongPage = ({ navigation, route }: any) => {
       return <Play strokeWidth={3} size={25} color={'#FFF'} />;
     }
   };
+
+  useEffect(() => {
+    musicContext?.setSearch(search);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search]);
 
   return (
     <>

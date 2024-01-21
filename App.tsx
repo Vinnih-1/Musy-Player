@@ -11,6 +11,9 @@ import TrackPlayer, {
   AppKilledPlaybackBehavior,
   Capability,
 } from 'react-native-track-player';
+import { MMKV } from 'react-native-mmkv';
+
+export const storage = new MMKV({ id: 'musyplayer' });
 
 function App(): React.JSX.Element {
   const { theme } = useStyles();

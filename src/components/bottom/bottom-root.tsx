@@ -23,7 +23,7 @@ export const BottomRoot = ({ children, onClick }: BottomRootProps) => {
 const stylesheet = createStyleSheet(theme => ({
   container: {
     flex: 1,
-    maxHeight: '15%',
+    maxHeight: 120,
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: theme.colors.bottom,

@@ -1,9 +1,9 @@
 import React from 'react';
 import { Image, Text, View } from 'react-native';
 import { createStyleSheet, useStyles } from 'react-native-unistyles';
-import { Playlist } from '../../contexts/music-player-context';
+import { PlaylistProps } from '../../contexts/music-player-context';
 
-export const PlaylistContent = (playlist: Playlist) => {
+export const PlaylistContent = (playlist: PlaylistProps) => {
   const { styles } = useStyles(stylesheet);
 
   return (

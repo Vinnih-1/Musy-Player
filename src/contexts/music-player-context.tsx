@@ -15,22 +15,22 @@ interface MusicPropsProvider {
   children: ReactNode;
 }
 
-export interface Playlist {
+export interface PlaylistProps {
   name: string;
   musics: MusicProps[];
 }
 
 interface TrackerProps {
   musics: MusicProps[];
-  playlists: Map<string, Playlist>;
+  playlists: Map<string, PlaylistProps>;
   search?: string;
   loading: boolean;
   setSearch: (search: string) => void;
-  createPlaylist: (playlistName: string) => Promise<Playlist>;
+  createPlaylist: (playlistName: string) => Promise<PlaylistProps>;
   deletePlaylist: (playlistName: string) => Promise<void>;
   addMusicToPlaylist: (playlistName: string, music: MusicProps) => void;
   removeMusicFromPlaylist: (playlistName: string, music: MusicProps) => void;
-  getLovedPlaylist: () => Playlist | undefined;
+  getLovedPlaylist: () => PlaylistProps | undefined;
 }
 
 const MusicProvider = ({ children }: MusicPropsProvider) => {
@@ -41,9 +41,9 @@ const MusicProvider = ({ children }: MusicPropsProvider) => {
     }));
   };
 
-  const createPlaylist = (playlistName: string): Promise<Playlist> => {
-    const newPlayList: Playlist = { name: playlistName, musics: [] };
-    return new Promise<Playlist>(resolve => {
+  const createPlaylist = (playlistName: string): Promise<PlaylistProps> => {
+    const newPlayList: PlaylistProps = { name: playlistName, musics: [] };
+    return new Promise<PlaylistProps>(resolve => {
       if (!tracker.playlists.has(newPlayList.name)) {
         tracker.playlists.set(playlistName, newPlayList);
         setTracker(prevState => ({
@@ -147,7 +147,7 @@ const MusicProvider = ({ children }: MusicPropsProvider) => {
   }, []);
 
   const loadPlaylists = () => {
-    const lovedMusics: Playlist = {
+    const lovedMusics: PlaylistProps = {
       name: 'loved',
       musics: [],
     };
@@ -156,7 +156,9 @@ const MusicProvider = ({ children }: MusicPropsProvider) => {
         .getAllKeys()
         .filter(key => key.includes('playlists'))
         .forEach(p => {
-          const playlist = JSON.parse(storage.getString(p) ?? '') as Playlist;
+          const playlist = JSON.parse(
+            storage.getString(p) ?? '',
+          ) as PlaylistProps;
           if (playlist) {
             tracker.playlists.set(playlist.name, playlist);
           }
@@ -172,8 +174,8 @@ const MusicProvider = ({ children }: MusicPropsProvider) => {
 
   useEffect(() => {
     loadMusics().then(musics =>
-      TrackPlayer.getQueue().then(queue => {
-        if (!queue.length && musics.length) {
+      TrackPlayer.getQueue().then(() => {
+        if (musics.length) {
           TrackPlayer.setQueue(musics);
         }
       }),

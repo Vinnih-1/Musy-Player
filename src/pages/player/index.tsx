@@ -1,11 +1,12 @@
 import React, {
   useCallback,
+  useContext,
   useEffect,
   useMemo,
   useRef,
   useState,
 } from 'react';
-import { Image, Linking, Text, View } from 'react-native';
+import { Image, Linking, Text, ToastAndroid, View } from 'react-native';
 import { createStyleSheet, useStyles } from 'react-native-unistyles';
 import {
   ChevronDown,
@@ -34,6 +35,8 @@ import TrackPlayer, {
 import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { Song } from '../../components/song';
 import { storage } from '../../../App';
+import { MusicContext } from '../../contexts/music-player-context';
+import { MusicProps } from '../../services/music-scanner-service';
 
 const TITLE_CHARACTERS_LIMIT = 60;
 const ARTIST_CHARACTERS_LIMIT = 15;
@@ -46,11 +49,50 @@ interface PlayerProps {
 export const PlayerPage = ({ navigation }: any) => {
   const { styles } = useStyles(stylesheet);
   const { position, duration } = useProgress();
+  const [player, setPlayer] = useState<PlayerProps>();
   const [queue, setQueue] = useState<Track[]>();
+  const musicContext = useContext(MusicContext);
   const sheetRef = useRef<BottomSheet>(null);
   const track = useActiveTrack();
   const state = usePlaybackState();
-  const [player, setPlayer] = useState<PlayerProps>();
+
+  useEffect(() => {
+    if (track) {
+      TrackPlayer.getQueue().then(trackQueue => setQueue(trackQueue));
+    }
+  }, [track]);
+
+  useEffect(() => {
+    const isMuted = storage.getBoolean('isMuted') ?? false;
+    const repeatMode = getRepeatModeByIndex(
+      storage.getNumber('repeatMode') ?? 0,
+    );
+    updatePlayerProps({ repeatMode: repeatMode, isMuted: isMuted });
+  }, []);
+
+  const snapPoints = useMemo(() => ['25%', '90%'], []);
+
+  const renderQueueMusics = useCallback((music: Track, index: number) => {
+    return (
+      <Song.Root
+        key={index}
+        onClick={() => {
+          TrackPlayer.skip(index);
+        }}>
+        <Song.Image />
+        <Song.Details
+          name={music.title ?? ''}
+          artist={music.artist ?? ''}
+          isPlaying={false}
+        />
+      </Song.Root>
+    );
+  }, []);
+
+  if (!musicContext) {
+    return;
+  }
+  const lovedPlaylist = musicContext.getLovedPlaylist();
 
   const getPosition = (): string => {
     const positionString = `${Math.floor(position / 60)}:${(
@@ -70,19 +112,9 @@ export const PlayerPage = ({ navigation }: any) => {
     return durationString;
   };
 
-  useEffect(() => {
-    if (track) {
-      TrackPlayer.getQueue().then(trackQueue => setQueue(trackQueue));
-    }
-  }, [track]);
-
-  useEffect(() => {
-    const isMuted = storage.getBoolean('isMuted') ?? false;
-    const repeatMode = getRepeatModeByIndex(
-      storage.getNumber('repeatMode') ?? 0,
-    );
-    updatePlayerProps({ repeatMode: repeatMode, isMuted: isMuted });
-  }, []);
+  const toast = (message: string) => {
+    ToastAndroid.show(message, ToastAndroid.SHORT);
+  };
 
   const getPlaybackButton = () => {
     const playingStates = ['playing', 'buffering', 'loading', 'ready'];
@@ -120,25 +152,6 @@ export const PlayerPage = ({ navigation }: any) => {
       return <Volume2 strokeWidth={2} color={'#FFF'} size={25} />;
     }
   };
-
-  const snapPoints = useMemo(() => ['25%', '90%'], []);
-
-  const renderQueueMusics = useCallback((music: Track, index: number) => {
-    return (
-      <Song.Root
-        key={index}
-        onClick={() => {
-          TrackPlayer.skip(index);
-        }}>
-        <Song.Image />
-        <Song.Details
-          name={music.title ?? ''}
-          artist={music.artist ?? ''}
-          isPlaying={false}
-        />
-      </Song.Root>
-    );
-  }, []);
 
   const updatePlayerProps = (props: PlayerProps) => {
     setPlayer({
@@ -240,8 +253,37 @@ export const PlayerPage = ({ navigation }: any) => {
               }}>
               {renderRepeatModeButton()}
             </TouchableOpacity>
-            <TouchableOpacity>
-              <Heart strokeWidth={2} color={'#FFF'} size={25} />
+            <TouchableOpacity
+              onPress={() => {
+                if (!lovedPlaylist) {
+                  return;
+                }
+
+                if (
+                  lovedPlaylist.musics.find(music => music.url === track?.url)
+                ) {
+                  musicContext.removeMusicFromPlaylist(
+                    lovedPlaylist.name,
+                    track as MusicProps,
+                  );
+                  toast(
+                    `Música ${track?.title} removida de ${lovedPlaylist.name}`,
+                  );
+                } else {
+                  musicContext.addMusicToPlaylist(
+                    lovedPlaylist.name,
+                    track as MusicProps,
+                  );
+                  toast(
+                    `Música ${track?.title} adicionada em ${lovedPlaylist.name}`,
+                  );
+                }
+              }}>
+              {lovedPlaylist?.musics.find(music => music.url === track?.url) ? (
+                <Heart strokeWidth={2} color={'#FFF'} size={25} fill={'#FFF'} />
+              ) : (
+                <Heart strokeWidth={2} color={'#FFF'} size={25} />
+              )}
             </TouchableOpacity>
           </View>
           <View>

@@ -27,6 +27,7 @@ interface TrackerProps {
   loading: boolean;
   setSearch: (search: string) => void;
   createPlaylist: (playlistName: string) => Promise<Playlist>;
+  deletePlaylist: (playlistName: string) => Promise<void>;
   addMusicToPlaylist: (playlistName: string, music: MusicProps) => void;
   removeMusicFromPlaylist: (playlistName: string, music: MusicProps) => void;
   getLovedPlaylist: () => Playlist | undefined;
@@ -56,6 +57,22 @@ const MusicProvider = ({ children }: MusicPropsProvider) => {
         resolve(newPlayList);
       } else {
         throw new Error(newPlayList.name);
+      }
+    });
+  };
+
+  const deletePlaylist = (playlistName: string): Promise<void> => {
+    return new Promise<void>(resolve => {
+      if (playlistName !== getLovedPlaylist()?.name) {
+        tracker.playlists.delete(playlistName);
+        setTracker(prevState => ({
+          ...prevState,
+          playlists: tracker.playlists,
+        }));
+        storage.delete(`playlists.${playlistName}`);
+        resolve();
+      } else {
+        throw new Error();
       }
     });
   };
@@ -109,6 +126,7 @@ const MusicProvider = ({ children }: MusicPropsProvider) => {
     loading: true,
     setSearch,
     createPlaylist,
+    deletePlaylist,
     addMusicToPlaylist,
     removeMusicFromPlaylist,
     getLovedPlaylist,

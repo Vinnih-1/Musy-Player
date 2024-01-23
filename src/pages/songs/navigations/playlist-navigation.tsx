@@ -11,13 +11,16 @@ import {
 import { createStyleSheet, useStyles } from 'react-native-unistyles';
 import { MusicContext } from '../../../contexts/music-player-context';
 import { Playlist } from '../../../components/playlist';
-import { ListVideo, ListPlus, X } from 'lucide-react-native';
+import { ListVideo, ListPlus, X, Trash2 } from 'lucide-react-native';
 
 export const PlaylistNavigation = () => {
   const { styles, theme } = useStyles(stylesheet);
   const musicContext = useContext(MusicContext);
   const [modalVisible, setModalVisible] = useState(false);
   const [playlistName, setPlaylistName] = useState('');
+  const [selectPlaylist, setSelectPlaylist] = useState<{
+    [key: string]: boolean;
+  }>({});
 
   const toast = (message: string) => {
     ToastAndroid.show(message, ToastAndroid.LONG);
@@ -83,14 +86,52 @@ export const PlaylistNavigation = () => {
       <ScrollView>
         {musicContext?.playlists &&
           Array.from(musicContext.playlists).map(([key, value]) => (
-            <Playlist.Root key={key}>
+            <Playlist.Root
+              key={key}
+              onPress={() => {
+                setSelectPlaylist(prevState => ({
+                  ...prevState,
+                  [key]: !prevState[key],
+                }));
+              }}
+              onClick={() => {
+                Object.keys(selectPlaylist).forEach(() => {
+                  setSelectPlaylist({ [key]: false });
+                });
+              }}>
               <Playlist.Content name={value.name} musics={value.musics} />
-              <ListVideo
-                strokeWidth={3}
-                color={'#FFF'}
-                size={30}
-                style={styles.icon}
-              />
+              {selectPlaylist[key] ? (
+                <TouchableOpacity
+                  style={styles.playlistCardButton}
+                  onPress={() => {
+                    musicContext
+                      .deletePlaylist(value.name)
+                      .then(() => {
+                        toast('Você excluir esta playlist.');
+                      })
+                      .catch(() => {
+                        toast('Você não pode excluir esta playlist.');
+                      });
+                  }}>
+                  <Trash2
+                    strokeWidth={3}
+                    color={theme.colors.danger}
+                    size={30}
+                    style={styles.icon}
+                  />
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity
+                  style={styles.playlistCardButton}
+                  onPress={() => console.log('play')}>
+                  <ListVideo
+                    strokeWidth={3}
+                    color={'#FFF'}
+                    size={30}
+                    style={styles.icon}
+                  />
+                </TouchableOpacity>
+              )}
             </Playlist.Root>
           ))}
       </ScrollView>
@@ -124,6 +165,9 @@ const stylesheet = createStyleSheet(theme => ({
     backgroundColor: theme.colors.primary,
     borderRadius: 20,
     marginVertical: 40,
+  },
+  playlistCardButton: {
+    padding: 10,
   },
   modalRoot: {
     flex: 1,

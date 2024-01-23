@@ -5,12 +5,24 @@ import { TouchableOpacity } from 'react-native-gesture-handler';
 
 interface PlaylistRootProps {
   children: ReactNode;
+  onPress: () => void;
+  onClick: () => void;
 }
 
-export const PlaylistRoot = ({ children }: PlaylistRootProps) => {
+export const PlaylistRoot = ({
+  children,
+  onPress,
+  onClick,
+}: PlaylistRootProps) => {
   const { styles } = useStyles(stylesheet);
+
   return (
-    <TouchableOpacity style={styles.container}>{children}</TouchableOpacity>
+    <TouchableOpacity
+      style={styles.container}
+      onLongPress={onPress}
+      onPress={onClick}>
+      {children}
+    </TouchableOpacity>
   );
 };
 

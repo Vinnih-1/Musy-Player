@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useMemo, useRef, useState } from 'react';
 import {
   View,
   TouchableOpacity,
@@ -9,18 +9,28 @@ import {
   ScrollView,
 } from 'react-native';
 import { createStyleSheet, useStyles } from 'react-native-unistyles';
-import { MusicContext } from '../../../contexts/music-player-context';
+import {
+  MusicContext,
+  PlaylistProps,
+} from '../../../contexts/music-player-context';
 import { Playlist } from '../../../components/playlist';
 import { ListVideo, ListPlus, X, Trash2 } from 'lucide-react-native';
+import TrackPlayer from 'react-native-track-player';
+import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet';
+import { Song } from '../../../components/song';
 
 export const PlaylistNavigation = () => {
   const { styles, theme } = useStyles(stylesheet);
   const musicContext = useContext(MusicContext);
   const [modalVisible, setModalVisible] = useState(false);
   const [playlistName, setPlaylistName] = useState('');
-  const [selectPlaylist, setSelectPlaylist] = useState<{
+  const [deletePlaylist, setDeletePlaylist] = useState<{
     [key: string]: boolean;
   }>({});
+  const [selectPlaylist, setSelectPlaylist] = useState<PlaylistProps>();
+  const sheetRef = useRef<BottomSheet>(null);
+
+  const snapPoints = useMemo(() => ['1%', '100%'], []);
 
   const toast = (message: string) => {
     ToastAndroid.show(message, ToastAndroid.LONG);
@@ -89,18 +99,20 @@ export const PlaylistNavigation = () => {
             <Playlist.Root
               key={key}
               onPress={() => {
-                setSelectPlaylist(prevState => ({
+                setDeletePlaylist(prevState => ({
                   ...prevState,
                   [key]: !prevState[key],
                 }));
               }}
               onClick={() => {
-                Object.keys(selectPlaylist).forEach(() => {
-                  setSelectPlaylist({ [key]: false });
+                Object.keys(deletePlaylist).forEach(() => {
+                  setDeletePlaylist({ [key]: false });
                 });
+                setSelectPlaylist(value);
+                sheetRef.current?.snapToIndex(1);
               }}>
               <Playlist.Content name={value.name} musics={value.musics} />
-              {selectPlaylist[key] ? (
+              {deletePlaylist[key] ? (
                 <TouchableOpacity
                   style={styles.playlistCardButton}
                   onPress={() => {
@@ -123,7 +135,17 @@ export const PlaylistNavigation = () => {
               ) : (
                 <TouchableOpacity
                   style={styles.playlistCardButton}
-                  onPress={() => console.log('play')}>
+                  onPress={() => {
+                    if (value.musics.length) {
+                      TrackPlayer.setQueue(value.musics).then(() =>
+                        TrackPlayer.play().then(() =>
+                          toast(`Tocando a playlist ${value.name}.`),
+                        ),
+                      );
+                    } else {
+                      toast('Esta playlist está vazia.');
+                    }
+                  }}>
                   <ListVideo
                     strokeWidth={3}
                     color={'#FFF'}
@@ -135,6 +157,31 @@ export const PlaylistNavigation = () => {
             </Playlist.Root>
           ))}
       </ScrollView>
+      <BottomSheet
+        ref={sheetRef}
+        snapPoints={snapPoints}
+        backgroundStyle={styles.sheetStyleContainer}
+        handleIndicatorStyle={styles.sheetIndicatorStyle}
+        bottomInset={-120}
+        index={-1}>
+        <BottomSheetScrollView>
+          {selectPlaylist &&
+            selectPlaylist.musics.map((music, index) => (
+              <Song.Root
+                key={index}
+                onClick={() => {
+                  TrackPlayer.skip(index);
+                }}>
+                <Song.Image />
+                <Song.Details
+                  name={music.title ?? ''}
+                  artist={music.artist ?? ''}
+                  isPlaying={false}
+                />
+              </Song.Root>
+            ))}
+        </BottomSheetScrollView>
+      </BottomSheet>
     </View>
   );
 };
@@ -202,5 +249,11 @@ const stylesheet = createStyleSheet(theme => ({
   text: {
     color: theme.colors.white,
     fontSize: theme.fontSize.xs,
+  },
+  sheetStyleContainer: {
+    backgroundColor: theme.colors.bottom,
+  },
+  sheetIndicatorStyle: {
+    backgroundColor: theme.colors.white,
   },
 }));

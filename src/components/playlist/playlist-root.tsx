@@ -5,7 +5,7 @@ import { TouchableOpacity } from 'react-native-gesture-handler';
 
 interface PlaylistRootProps {
   children: ReactNode;
-  onPress: () => void;
+  onPress?: () => void;
   onClick: () => void;
 }
 
@@ -26,9 +26,8 @@ export const PlaylistRoot = ({
   );
 };
 
-const stylesheet = createStyleSheet(theme => ({
+const stylesheet = createStyleSheet(() => ({
   container: {
-    backgroundColor: theme.colors.background,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',

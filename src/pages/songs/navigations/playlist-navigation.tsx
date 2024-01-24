@@ -170,7 +170,9 @@ export const PlaylistNavigation = () => {
               <Song.Root
                 key={index}
                 onClick={() => {
-                  TrackPlayer.skip(index);
+                  TrackPlayer.setQueue(selectPlaylist.musics).then(() =>
+                    TrackPlayer.skip(index).then(() => TrackPlayer.play()),
+                  );
                 }}>
                 <Song.Image />
                 <Song.Details

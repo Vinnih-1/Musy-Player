@@ -47,7 +47,7 @@ export const SongsNavigation = () => {
     return <View style={styles.loading} />;
   }
 
-  if (musicContext.search !== undefined) {
+  /* if (musicContext.search !== undefined) {
     return (
       <View style={styles.content}>
         <ScrollView>
@@ -161,7 +161,7 @@ export const SongsNavigation = () => {
         </BottomSheet>
       </View>
     );
-  }
+  } */
 
   return (
     <View style={styles.content}>
@@ -176,8 +176,9 @@ export const SongsNavigation = () => {
                     return;
                   }
 
-                  await TrackPlayer.skip(index);
-                  TrackPlayer.play();
+                  TrackPlayer.setQueue(musicContext.musics).then(() =>
+                    TrackPlayer.play(),
+                  );
                 }}
                 onPress={() => {
                   setSelectMusic(music);

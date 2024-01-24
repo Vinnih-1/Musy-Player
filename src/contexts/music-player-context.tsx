@@ -90,16 +90,13 @@ const MusicProvider = ({ children }: MusicPropsProvider) => {
         `playlists.${playlist.name}`,
         JSON.stringify(tracker.playlists.get(playlist.name)),
       );
-      console.log(
-        `Playlist ${storage.getString(`playlists.${playlist.name}`)} salva`,
-      );
     }
   };
 
   const removeMusicFromPlaylist = (playlistName: string, music: MusicProps) => {
     const playlist = tracker.playlists.get(playlistName);
     if (playlist) {
-      const index = playlist.musics.findIndex(p => p.url !== music.url);
+      const index = playlist.musics.findIndex(p => p.url === music.url);
       playlist.musics.splice(index, 1);
       tracker.playlists.set(playlist.name, playlist);
       setTracker(prevState => ({
@@ -109,9 +106,6 @@ const MusicProvider = ({ children }: MusicPropsProvider) => {
       storage.set(
         `playlists.${playlist.name}`,
         JSON.stringify(tracker.playlists.get(playlist.name)),
-      );
-      console.log(
-        `Playlist ${storage.getString(`playlists.${playlist.name}`)} salva`,
       );
     }
   };

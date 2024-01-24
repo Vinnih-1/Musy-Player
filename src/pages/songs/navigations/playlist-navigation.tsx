@@ -178,6 +178,21 @@ export const PlaylistNavigation = () => {
                   artist={music.artist ?? ''}
                   isPlaying={false}
                 />
+                <TouchableOpacity
+                  onPress={() => {
+                    musicContext?.removeMusicFromPlaylist(
+                      selectPlaylist.name,
+                      music,
+                    );
+                    toast(`${music.title} removido de ${selectPlaylist.name}`);
+                  }}
+                  activeOpacity={0.5}>
+                  <Trash2
+                    strokeWidth={3}
+                    color={theme.colors.danger}
+                    size={30}
+                  />
+                </TouchableOpacity>
               </Song.Root>
             ))}
         </BottomSheetScrollView>

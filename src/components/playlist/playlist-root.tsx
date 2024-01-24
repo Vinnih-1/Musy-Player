@@ -1,32 +1,36 @@
 import React, { ReactNode } from 'react';
-import { TouchableOpacity } from 'react-native';
-import { createStyleSheet, useStyles } from 'react-native-unistyles';
 
-interface BottomRootProps {
+import { createStyleSheet, useStyles } from 'react-native-unistyles';
+import { TouchableOpacity } from 'react-native-gesture-handler';
+
+interface PlaylistRootProps {
   children: ReactNode;
+  onPress?: () => void;
   onClick: () => void;
 }
 
-export const BottomRoot = ({ children, onClick }: BottomRootProps) => {
+export const PlaylistRoot = ({
+  children,
+  onPress,
+  onClick,
+}: PlaylistRootProps) => {
   const { styles } = useStyles(stylesheet);
 
   return (
     <TouchableOpacity
       style={styles.container}
-      activeOpacity={0.7}
-      onPress={() => onClick()}>
+      onLongPress={onPress}
+      onPress={onClick}>
       {children}
     </TouchableOpacity>
   );
 };
 
-const stylesheet = createStyleSheet(theme => ({
+const stylesheet = createStyleSheet(() => ({
   container: {
-    flex: 1,
-    maxHeight: 120,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: theme.colors.bottom,
-    gap: 20,
+    justifyContent: 'space-between',
+    padding: 12,
   },
 }));

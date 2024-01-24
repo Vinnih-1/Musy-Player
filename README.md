@@ -12,8 +12,8 @@ My music app created with React Native (without Expo). This app is being created
 | Queue button    | open bottom sheet that contains queue musics|  ✅  |
 | Shuffle button  | shuffle queue musics                        |  ❌  |
 | Repeat button   | set repeat mode (OFF, TRACK and QUEUE)      |  ✅  |
-| Like button     | save current song in a liked playlist       |  ❌  |
-| Playlist page   | page containing all playlist created by user|  ❌  |
+| Like button     | save current song in a liked playlist       |  ✅  |
+| Playlist page   | page containing all playlist created by user|  ✅  |
 | Artists page    | page containing all artists                 |  ❌  |
 | Albums page     | page containing all albums                  |  ❌  |
 | Folder page     | folder path where app will scan all songs   |  ❌  |

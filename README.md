@@ -10,7 +10,7 @@ https://github.com/Vinnih-1/Musy-Player/assets/59892753/13f34c9c-987f-4d32-a65e-
 |---------------|-----------------------------------------------|------|
 | Mute button     | mute and unmute at the Player page          |  ✅  |
 | Queue button    | open bottom sheet that contains queue musics|  ✅  |
-| Shuffle button  | shuffle queue musics                        |  ❌  |
+| Shuffle button  | shuffle queue musics                        |  ✅  |
 | Repeat button   | set repeat mode (OFF, TRACK and QUEUE)      |  ✅  |
 | Like button     | save current song in a liked playlist       |  ✅  |
 | Playlist page   | page containing all playlist created by user|  ✅  |

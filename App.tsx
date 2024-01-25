@@ -4,7 +4,6 @@ import React from 'react';
 import { Home } from './src/pages/home/index.tsx';
 import { StatusBar } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
-import MusicProvider from './src/contexts/music-player-context.tsx';
 import { useStyles } from 'react-native-unistyles';
 import TrackPlayer, {
   AndroidAudioContentType,
@@ -46,9 +45,7 @@ function App(): React.JSX.Element {
         barStyle={'light-content'}
         backgroundColor={theme.colors.background}
       />
-      <MusicProvider>
-        <Home />
-      </MusicProvider>
+      <Home />
     </NavigationContainer>
   );
 }

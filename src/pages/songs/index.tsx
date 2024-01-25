@@ -180,6 +180,8 @@ const stylesheet = createStyleSheet(theme => ({
   searchInput: {
     maxWidth: 100,
     overflow: 'hidden',
+    color: theme.colors.white,
+    fontSize: theme.fontSize.xs,
   },
   permissionScreen: {
     flex: 1,

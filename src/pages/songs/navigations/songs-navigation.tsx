@@ -37,9 +37,6 @@ export const SongsNavigation = () => {
           music.title.toLowerCase().includes(search),
         );
 
-  console.log(search === '');
-  console.log(search);
-
   const toast = (message: string) => {
     ToastAndroid.show(message, ToastAndroid.LONG);
   };

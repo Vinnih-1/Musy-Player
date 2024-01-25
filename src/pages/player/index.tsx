@@ -43,6 +43,7 @@ const ARTIST_CHARACTERS_LIMIT = 15;
 
 interface PlayerProps {
   repeatMode: RepeatMode;
+  isShuffled: boolean;
   isMuted: boolean;
 }
 
@@ -63,11 +64,18 @@ export const PlayerPage = ({ navigation }: any) => {
   }, [track]);
 
   useEffect(() => {
+    const isShuffled = storage.getBoolean('isShuffled') ?? false;
     const isMuted = storage.getBoolean('isMuted') ?? false;
+
     const repeatMode = getRepeatModeByIndex(
       storage.getNumber('repeatMode') ?? 0,
     );
-    updatePlayerProps({ repeatMode: repeatMode, isMuted: isMuted });
+
+    updatePlayerProps({
+      repeatMode: repeatMode,
+      isShuffled: isShuffled,
+      isMuted: isMuted,
+    });
   }, []);
 
   const snapPoints = useMemo(() => ['25%', '90%'], []);
@@ -89,10 +97,7 @@ export const PlayerPage = ({ navigation }: any) => {
     );
   }, []);
 
-  if (!musicContext) {
-    return;
-  }
-  const lovedPlaylist = musicContext.getLovedPlaylist();
+  const lovedPlaylist = musicContext?.getLovedPlaylist();
 
   const getPosition = (): string => {
     const positionString = `${Math.floor(position / 60)}:${(
@@ -153,9 +158,24 @@ export const PlayerPage = ({ navigation }: any) => {
     }
   };
 
+  const renderShuffleButton = () => {
+    if (!player) {
+      return;
+    }
+
+    return (
+      <Shuffle
+        strokeWidth={2}
+        color={player.isShuffled ? '#FFF' : '#71717a'}
+        size={25}
+      />
+    );
+  };
+
   const updatePlayerProps = (props: PlayerProps) => {
     setPlayer({
       repeatMode: props.repeatMode,
+      isShuffled: props.isShuffled,
       isMuted: props.isMuted,
     });
 
@@ -167,6 +187,7 @@ export const PlayerPage = ({ navigation }: any) => {
 
     TrackPlayer.setRepeatMode(props.repeatMode).then(() => {
       storage.set('repeatMode', props.repeatMode.valueOf());
+      storage.set('isShuffled', props.isShuffled);
       storage.set('isMuted', props.isMuted);
     });
   };
@@ -182,6 +203,12 @@ export const PlayerPage = ({ navigation }: any) => {
       default:
         return RepeatMode.Off;
     }
+  };
+
+  const handleShuffleQueue = async (shuffleQueue: Track[]) => {
+    await TrackPlayer.removeUpcomingTracks();
+    TrackPlayer.add(shuffleQueue);
+    setQueue(shuffleQueue);
   };
 
   return (
@@ -224,6 +251,7 @@ export const PlayerPage = ({ navigation }: any) => {
               onPress={() => {
                 if (player) {
                   updatePlayerProps({
+                    isShuffled: player.isShuffled,
                     isMuted: !player.isMuted,
                     repeatMode: player.repeatMode,
                   });
@@ -237,8 +265,41 @@ export const PlayerPage = ({ navigation }: any) => {
               }}>
               <ListMusic strokeWidth={2} color={'#FFF'} size={25} />
             </TouchableOpacity>
-            <TouchableOpacity>
-              <Shuffle strokeWidth={2} color={'#FFF'} size={25} />
+            <TouchableOpacity
+              onPress={async () => {
+                if (player) {
+                  updatePlayerProps({
+                    isShuffled: !player.isShuffled,
+                    isMuted: player.isMuted,
+                    repeatMode: player.repeatMode,
+                  });
+                  if (!player.isShuffled) {
+                    const currentQueue = (await TrackPlayer.getQueue()).filter(
+                      current => current.url !== track?.url,
+                    );
+
+                    const shuffledQueue = currentQueue.sort(
+                      () => Math.random() - 0.5,
+                    );
+
+                    storage.set(
+                      'shuffle.defaultQueue',
+                      JSON.stringify(currentQueue),
+                    );
+
+                    await handleShuffleQueue(shuffledQueue);
+                    toast('Modo aleatório ativado.');
+                  } else {
+                    const defaultQueue = JSON.parse(
+                      storage.getString('shuffle.defaultQueue') ?? '',
+                    ) as unknown as Track[];
+
+                    await handleShuffleQueue(defaultQueue);
+                    toast('Modo aleatório desativado.');
+                  }
+                }
+              }}>
+              {renderShuffleButton()}
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => {
@@ -247,6 +308,7 @@ export const PlayerPage = ({ navigation }: any) => {
                     repeatMode: getRepeatModeByIndex(
                       player.repeatMode.valueOf() + 1,
                     ),
+                    isShuffled: player.isShuffled,
                     isMuted: player.isMuted,
                   });
                 }
@@ -255,7 +317,7 @@ export const PlayerPage = ({ navigation }: any) => {
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => {
-                if (!lovedPlaylist) {
+                if (!musicContext || !lovedPlaylist) {
                   return;
                 }
 

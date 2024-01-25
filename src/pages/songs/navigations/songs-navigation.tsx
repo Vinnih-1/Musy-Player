@@ -19,25 +19,38 @@ import { Playlist } from '../../../components/playlist';
 
 export const SongsNavigation = () => {
   const { styles, theme } = useStyles(stylesheet);
-  const musicContext = useContext(MusicContext);
-  const [search, setSearch] = useState('');
+
   const [selectMusic, setSelectMusic] = useState<MusicProps>();
+  const [search, setSearch] = useState('');
+
+  const musicContext = useContext(MusicContext);
+
   const track = useActiveTrack();
 
   const sheetRef = useRef<BottomSheet>(null);
   const snapPoints = useMemo(() => ['1%', '100%'], []);
+
+  const filteredMusics =
+    search === ''
+      ? musicContext?.musics
+      : musicContext?.musics.filter(music =>
+          music.title.toLowerCase().includes(search),
+        );
+
+  console.log(search === '');
+  console.log(search);
 
   const toast = (message: string) => {
     ToastAndroid.show(message, ToastAndroid.LONG);
   };
 
   useEffect(() => {
-    if (musicContext && musicContext.search) {
-      setSearch(musicContext.search.toLowerCase());
-    }
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [musicContext?.search]);
+    setSearch(
+      musicContext && musicContext.search !== undefined
+        ? musicContext.search.toLowerCase()
+        : '',
+    );
+  }, [musicContext, musicContext?.search]);
 
   if (!musicContext) {
     return null;
@@ -47,127 +60,11 @@ export const SongsNavigation = () => {
     return <View style={styles.loading} />;
   }
 
-  /* if (musicContext.search !== undefined) {
-    return (
-      <View style={styles.content}>
-        <ScrollView>
-          {musicContext.musics
-            .filter(music => music.title.toLowerCase().includes(search))
-            .map((music, index) => (
-              <View style={styles.hover} key={index}>
-                <Song.Root
-                  onClick={async () => {
-                    if (selectMusic) {
-                      setSelectMusic(undefined);
-                      return;
-                    }
-
-                    await TrackPlayer.skip(index);
-                    TrackPlayer.play();
-                  }}
-                  onPress={() => {
-                    setSelectMusic(music);
-                  }}>
-                  <Song.Image />
-                  <Song.Details
-                    name={music.title}
-                    artist={music.artist}
-                    isPlaying={track && track.url === music.url ? true : false}
-                  />
-                </Song.Root>
-                {selectMusic?.title === music.title && (
-                  <View style={styles.pressContent}>
-                    <Music2 strokeWidth={3} color={'#FFF'} size={40} />
-                    <Text style={styles.pressContentText}>{music.title}</Text>
-                    <View style={styles.musicButtons}>
-                      <TouchableOpacity
-                        onPress={() => {
-                          TrackPlayer.setQueue([music]).then(() =>
-                            TrackPlayer.play(),
-                          );
-                        }}
-                        activeOpacity={0.5}>
-                        <Play
-                          strokeWidth={3}
-                          color={theme.colors.green}
-                          size={30}
-                        />
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        onPress={() => {
-                          sheetRef.current?.snapToIndex(1);
-                        }}
-                        activeOpacity={0.5}>
-                        <ListPlus
-                          strokeWidth={3}
-                          color={theme.colors.primary}
-                          size={30}
-                        />
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        onPress={() => {
-                          Alert.alert(
-                            'Excluir música?',
-                            'Ao confirmar, você removerá esta música do seu dispositivo.',
-                            [
-                              {
-                                text: 'Confirmar',
-                                style: 'destructive',
-                              },
-                              {
-                                text: 'Cancelar',
-                                style: 'cancel',
-                              },
-                            ],
-                          );
-                        }}
-                        activeOpacity={0.5}>
-                        <Trash2
-                          strokeWidth={3}
-                          color={theme.colors.danger}
-                          size={30}
-                        />
-                      </TouchableOpacity>
-                    </View>
-                  </View>
-                )}
-              </View>
-            ))}
-        </ScrollView>
-        <BottomSheet
-          ref={sheetRef}
-          snapPoints={snapPoints}
-          backgroundStyle={styles.sheetStyleContainer}
-          handleIndicatorStyle={styles.sheetIndicatorStyle}
-          index={-1}>
-          <BottomSheetScrollView>
-            {Array.from(musicContext.playlists).map(([key, value]) => (
-              <Playlist.Root
-                key={key}
-                onClick={() => {
-                  if (selectMusic) {
-                    musicContext.addMusicToPlaylist(value.name, selectMusic);
-                    toast(
-                      `A música ${selectMusic.title} foi adicionada a playlist ${value.name}`,
-                    );
-                    sheetRef.current?.close();
-                    setSelectMusic(undefined);
-                  }
-                }}>
-                <Playlist.Content name={value.name} musics={value.musics} />
-              </Playlist.Root>
-            ))}
-          </BottomSheetScrollView>
-        </BottomSheet>
-      </View>
-    );
-  } */
-
   return (
     <View style={styles.content}>
       <ScrollView>
-        {musicContext.musics.length ? (
-          musicContext.musics.map((music, index) => (
+        {filteredMusics ? (
+          filteredMusics.map((music, index) => (
             <View style={styles.hover} key={index}>
               <Song.Root
                 onClick={async () => {
@@ -175,10 +72,17 @@ export const SongsNavigation = () => {
                     setSelectMusic(undefined);
                     return;
                   }
-
-                  TrackPlayer.setQueue(musicContext.musics).then(() =>
-                    TrackPlayer.play(),
+                  const selected = musicContext.musics.findIndex(
+                    select => select.url === music.url,
                   );
+
+                  if (selected === -1) {
+                    return;
+                  }
+
+                  await TrackPlayer.setQueue(musicContext.musics);
+                  await TrackPlayer.skip(selected);
+                  await TrackPlayer.play();
                 }}
                 onPress={() => {
                   setSelectMusic(music);

@@ -18,6 +18,7 @@ import { ListVideo, ListPlus, X, Trash2 } from 'lucide-react-native';
 import TrackPlayer from 'react-native-track-player';
 import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { Song } from '../../../components/song';
+import { storage } from '../../../../App';
 
 export const PlaylistNavigation = () => {
   const { styles, theme } = useStyles(stylesheet);
@@ -137,6 +138,11 @@ export const PlaylistNavigation = () => {
                   style={styles.playlistCardButton}
                   onPress={() => {
                     if (value.musics.length) {
+                      storage.set(
+                        'shuffle.defaultQueue',
+                        JSON.stringify(value.musics),
+                      );
+
                       TrackPlayer.setQueue(value.musics).then(() =>
                         TrackPlayer.play().then(() =>
                           toast(`Tocando a playlist ${value.name}.`),

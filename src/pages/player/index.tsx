@@ -273,27 +273,18 @@ export const PlayerPage = ({ navigation }: any) => {
                     isMuted: player.isMuted,
                     repeatMode: player.repeatMode,
                   });
+                  const defaultQueue = JSON.parse(
+                    storage.getString('shuffle.defaultQueue') ?? '',
+                  ) as unknown as Track[];
+
                   if (!player.isShuffled) {
-                    const currentQueue = (await TrackPlayer.getQueue()).filter(
-                      current => current.url !== track?.url,
-                    );
-
-                    const shuffledQueue = currentQueue.sort(
+                    const shuffledQueue = defaultQueue.sort(
                       () => Math.random() - 0.5,
-                    );
-
-                    storage.set(
-                      'shuffle.defaultQueue',
-                      JSON.stringify(currentQueue),
                     );
 
                     await handleShuffleQueue(shuffledQueue);
                     toast('Modo aleatório ativado.');
                   } else {
-                    const defaultQueue = JSON.parse(
-                      storage.getString('shuffle.defaultQueue') ?? '',
-                    ) as unknown as Track[];
-
                     await handleShuffleQueue(defaultQueue);
                     toast('Modo aleatório desativado.');
                   }

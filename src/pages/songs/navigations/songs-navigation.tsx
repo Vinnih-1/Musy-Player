@@ -16,6 +16,7 @@ import { MusicProps } from '../../../services/music-scanner-service';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { Playlist } from '../../../components/playlist';
+import { storage } from '../../../../App';
 
 export const SongsNavigation = () => {
   const { styles, theme } = useStyles(stylesheet);
@@ -76,6 +77,10 @@ export const SongsNavigation = () => {
                   if (selected === -1) {
                     return;
                   }
+                  storage.set(
+                    'shuffle.defaultQueue',
+                    JSON.stringify(musicContext.musics),
+                  );
 
                   await TrackPlayer.setQueue(musicContext.musics);
                   await TrackPlayer.skip(selected);

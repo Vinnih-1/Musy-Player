@@ -79,7 +79,11 @@ export const SongsNavigation = () => {
                   }
                   storage.set(
                     'shuffle.defaultQueue',
-                    JSON.stringify(musicContext.musics),
+                    JSON.stringify(
+                      musicContext.musics.filter(
+                        active => active.url !== track?.url,
+                      ),
+                    ),
                   );
 
                   await TrackPlayer.setQueue(musicContext.musics);

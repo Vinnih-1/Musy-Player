@@ -15,22 +15,25 @@ import {
 } from '../../../contexts/music-player-context';
 import { Playlist } from '../../../components/playlist';
 import { ListVideo, ListPlus, X, Trash2 } from 'lucide-react-native';
-import TrackPlayer from 'react-native-track-player';
+import TrackPlayer, { useActiveTrack } from 'react-native-track-player';
 import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { Song } from '../../../components/song';
 import { storage } from '../../../../App';
 
 export const PlaylistNavigation = () => {
+  const [playlistName, setPlaylistName] = useState('');
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectPlaylist, setSelectPlaylist] = useState<PlaylistProps>();
+
   const { styles, theme } = useStyles(stylesheet);
   const musicContext = useContext(MusicContext);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [playlistName, setPlaylistName] = useState('');
+  const track = useActiveTrack();
+
   const [deletePlaylist, setDeletePlaylist] = useState<{
     [key: string]: boolean;
   }>({});
-  const [selectPlaylist, setSelectPlaylist] = useState<PlaylistProps>();
-  const sheetRef = useRef<BottomSheet>(null);
 
+  const sheetRef = useRef<BottomSheet>(null);
   const snapPoints = useMemo(() => ['1%', '100%'], []);
 
   const toast = (message: string) => {
@@ -140,7 +143,11 @@ export const PlaylistNavigation = () => {
                     if (value.musics.length) {
                       storage.set(
                         'shuffle.defaultQueue',
-                        JSON.stringify(value.musics),
+                        JSON.stringify(
+                          value.musics.filter(
+                            active => active.url !== track?.url,
+                          ),
+                        ),
                       );
 
                       TrackPlayer.setQueue(value.musics).then(() =>

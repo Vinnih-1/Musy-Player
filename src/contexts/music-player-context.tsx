@@ -6,7 +6,6 @@ import React, {
   useState,
 } from 'react';
 import { MusicProps, musicScanner } from '../services/music-scanner-service';
-import TrackPlayer from 'react-native-track-player';
 import { storage } from '../../App';
 
 export const MusicContext = createContext<TrackerProps | undefined>(undefined);
@@ -167,14 +166,9 @@ const MusicProvider = ({ children }: MusicPropsProvider) => {
   };
 
   useEffect(() => {
-    loadMusics().then(musics =>
-      TrackPlayer.getQueue().then(() => {
-        if (musics.length) {
-          TrackPlayer.setQueue(musics);
-        }
-      }),
-    );
+    loadMusics();
     loadPlaylists();
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

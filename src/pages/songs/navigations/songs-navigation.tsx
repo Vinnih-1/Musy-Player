@@ -1,8 +1,16 @@
-import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { createStyleSheet, useStyles } from 'react-native-unistyles';
-import { MusicContext } from '../../../contexts/music-player-context';
+import { TrackerContext } from '../../../contexts/tracker-context';
 import {
   Alert,
+  RefreshControl,
   SafeAreaView,
   ScrollView,
   Text,
@@ -17,14 +25,16 @@ import { TouchableOpacity } from 'react-native-gesture-handler';
 import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { Playlist } from '../../../components/playlist';
 import { storage } from '../../../../App';
+import Animated, { FadeInLeft } from 'react-native-reanimated';
 
 export const SongsNavigation = () => {
   const { styles, theme } = useStyles(stylesheet);
 
   const [selectMusic, setSelectMusic] = useState<MusicProps>();
+  const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState('');
 
-  const musicContext = useContext(MusicContext);
+  const musicContext = useContext(TrackerContext);
 
   const track = useActiveTrack();
 
@@ -41,6 +51,10 @@ export const SongsNavigation = () => {
   const toast = (message: string) => {
     ToastAndroid.show(message, ToastAndroid.LONG);
   };
+
+  const onRefresh = useCallback(() => {
+    musicContext?.loadMusics().then(() => setRefreshing(false));
+  }, [musicContext]);
 
   useEffect(() => {
     setSearch(
@@ -60,10 +74,16 @@ export const SongsNavigation = () => {
 
   return (
     <View style={styles.content}>
-      <ScrollView>
+      <ScrollView
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }>
         {filteredMusics ? (
           filteredMusics.map((music, index) => (
-            <View style={styles.hover} key={index}>
+            <Animated.View
+              entering={FadeInLeft.springify().delay(200)}
+              style={styles.hover}
+              key={index}>
               <Song.Root
                 onClick={async () => {
                   if (selectMusic) {
@@ -77,16 +97,17 @@ export const SongsNavigation = () => {
                   if (selected === -1) {
                     return;
                   }
-                  storage.set(
-                    'shuffle.defaultQueue',
-                    JSON.stringify(
-                      musicContext.musics.filter(
-                        active => active.url !== track?.url,
-                      ),
-                    ),
+
+                  await TrackPlayer.setQueue(musicContext.musics).then(
+                    async () => {
+                      const queue = await TrackPlayer.getQueue();
+                      storage.set(
+                        'shuffle.defaultQueue',
+                        JSON.stringify(queue),
+                      );
+                    },
                   );
 
-                  await TrackPlayer.setQueue(musicContext.musics);
                   await TrackPlayer.skip(selected);
                   await TrackPlayer.play();
                 }}
@@ -156,7 +177,7 @@ export const SongsNavigation = () => {
                   </View>
                 </View>
               )}
-            </View>
+            </Animated.View>
           ))
         ) : (
           <SafeAreaView style={styles.warnScreen}>

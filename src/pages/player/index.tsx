@@ -1,7 +1,6 @@
 import React, {
   useCallback,
   useContext,
-  useEffect,
   useMemo,
   useRef,
   useState,
@@ -34,49 +33,30 @@ import TrackPlayer, {
 } from 'react-native-track-player';
 import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { Song } from '../../components/song';
-import { storage } from '../../../App';
-import { MusicContext } from '../../contexts/music-player-context';
+import { TrackerContext } from '../../contexts/tracker-context';
 import { MusicProps } from '../../services/music-scanner-service';
+import { PlayerContext } from '../../contexts/player-context';
 
 const TITLE_CHARACTERS_LIMIT = 60;
 const ARTIST_CHARACTERS_LIMIT = 15;
-
-interface PlayerProps {
-  repeatMode: RepeatMode;
-  isShuffled: boolean;
-  isMuted: boolean;
-}
+const PROGRESS_UPDATE_INTERVAL = 100;
 
 export const PlayerPage = ({ navigation }: any) => {
+  const { position, duration } = useProgress(PROGRESS_UPDATE_INTERVAL);
+
+  const trackerContext = useContext(TrackerContext);
+  const playerContext = useContext(PlayerContext);
+
   const { styles } = useStyles(stylesheet);
-  const { position, duration } = useProgress();
-  const [player, setPlayer] = useState<PlayerProps>();
   const [queue, setQueue] = useState<Track[]>();
-  const musicContext = useContext(MusicContext);
   const sheetRef = useRef<BottomSheet>(null);
+
   const track = useActiveTrack();
   const state = usePlaybackState();
 
-  useEffect(() => {
-    if (track) {
-      TrackPlayer.getQueue().then(trackQueue => setQueue(trackQueue));
-    }
-  }, [track]);
-
-  useEffect(() => {
-    const isShuffled = storage.getBoolean('isShuffled') ?? false;
-    const isMuted = storage.getBoolean('isMuted') ?? false;
-
-    const repeatMode = getRepeatModeByIndex(
-      storage.getNumber('repeatMode') ?? 0,
-    );
-
-    updatePlayerProps({
-      repeatMode: repeatMode,
-      isShuffled: isShuffled,
-      isMuted: isMuted,
-    });
-  }, []);
+  const updateQueue = () => {
+    TrackPlayer.getQueue().then(trackQueue => setQueue(trackQueue));
+  };
 
   const snapPoints = useMemo(() => ['25%', '90%'], []);
 
@@ -97,7 +77,7 @@ export const PlayerPage = ({ navigation }: any) => {
     );
   }, []);
 
-  const lovedPlaylist = musicContext?.getLovedPlaylist();
+  const lovedPlaylist = trackerContext?.getLovedPlaylist();
 
   const getPosition = (): string => {
     const positionString = `${Math.floor(position / 60)}:${(
@@ -132,11 +112,7 @@ export const PlayerPage = ({ navigation }: any) => {
   };
 
   const renderRepeatModeButton = () => {
-    if (!player) {
-      return null;
-    }
-
-    switch (player.repeatMode) {
+    switch (playerContext?.repeatMode()) {
       case RepeatMode.Queue:
         return <Repeat strokeWidth={2} color={'#FFF'} size={25} />;
       case RepeatMode.Track:
@@ -147,11 +123,7 @@ export const PlayerPage = ({ navigation }: any) => {
   };
 
   const renderMuteButton = () => {
-    if (!player) {
-      return null;
-    }
-
-    if (player.isMuted) {
+    if (playerContext?.isMuted()) {
       return <VolumeX strokeWidth={2} color={'#FFF'} size={25} />;
     } else {
       return <Volume2 strokeWidth={2} color={'#FFF'} size={25} />;
@@ -159,56 +131,13 @@ export const PlayerPage = ({ navigation }: any) => {
   };
 
   const renderShuffleButton = () => {
-    if (!player) {
-      return;
-    }
-
     return (
       <Shuffle
         strokeWidth={2}
-        color={player.isShuffled ? '#FFF' : '#71717a'}
+        color={playerContext?.isShuffled() ? '#FFF' : '#71717a'}
         size={25}
       />
     );
-  };
-
-  const updatePlayerProps = (props: PlayerProps) => {
-    setPlayer({
-      repeatMode: props.repeatMode,
-      isShuffled: props.isShuffled,
-      isMuted: props.isMuted,
-    });
-
-    if (props.isMuted) {
-      TrackPlayer.setVolume(0);
-    } else {
-      TrackPlayer.setVolume(1);
-    }
-
-    TrackPlayer.setRepeatMode(props.repeatMode).then(() => {
-      storage.set('repeatMode', props.repeatMode.valueOf());
-      storage.set('isShuffled', props.isShuffled);
-      storage.set('isMuted', props.isMuted);
-    });
-  };
-
-  const getRepeatModeByIndex = (index: number): RepeatMode => {
-    switch (index) {
-      case 0:
-        return RepeatMode.Off;
-      case 1:
-        return RepeatMode.Track;
-      case 2:
-        return RepeatMode.Queue;
-      default:
-        return RepeatMode.Off;
-    }
-  };
-
-  const handleShuffleQueue = async (shuffleQueue: Track[]) => {
-    await TrackPlayer.removeUpcomingTracks();
-    TrackPlayer.add(shuffleQueue);
-    setQueue(shuffleQueue);
   };
 
   return (
@@ -247,75 +176,32 @@ export const PlayerPage = ({ navigation }: any) => {
             </Text>
           </View>
           <View style={styles.buttons}>
-            <TouchableOpacity
-              onPress={() => {
-                if (player) {
-                  updatePlayerProps({
-                    isShuffled: player.isShuffled,
-                    isMuted: !player.isMuted,
-                    repeatMode: player.repeatMode,
-                  });
-                }
-              }}>
+            <TouchableOpacity onPress={() => playerContext?.updateMuted()}>
               {renderMuteButton()}
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => {
                 sheetRef.current?.snapToPosition('90%');
+                updateQueue();
               }}>
               <ListMusic strokeWidth={2} color={'#FFF'} size={25} />
             </TouchableOpacity>
-            <TouchableOpacity
-              onPress={async () => {
-                if (player) {
-                  updatePlayerProps({
-                    isShuffled: !player.isShuffled,
-                    isMuted: player.isMuted,
-                    repeatMode: player.repeatMode,
-                  });
-                  const defaultQueue = JSON.parse(
-                    storage.getString('shuffle.defaultQueue') ?? '',
-                  ) as unknown as Track[];
-
-                  if (!player.isShuffled) {
-                    const shuffledQueue = defaultQueue.sort(
-                      () => Math.random() - 0.5,
-                    );
-
-                    await handleShuffleQueue(shuffledQueue);
-                    toast('Modo aleatório ativado.');
-                  } else {
-                    await handleShuffleQueue(defaultQueue);
-                    toast('Modo aleatório desativado.');
-                  }
-                }
-              }}>
+            <TouchableOpacity onPress={() => playerContext?.updateShuffle()}>
               {renderShuffleButton()}
             </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => {
-                if (player) {
-                  updatePlayerProps({
-                    repeatMode: getRepeatModeByIndex(
-                      player.repeatMode.valueOf() + 1,
-                    ),
-                    isShuffled: player.isShuffled,
-                    isMuted: player.isMuted,
-                  });
-                }
-              }}>
+            <TouchableOpacity onPress={() => playerContext?.updateRepeatMode()}>
               {renderRepeatModeButton()}
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => {
-                if (!musicContext || !lovedPlaylist) {
+                if (!trackerContext || !lovedPlaylist) {
                   return;
                 }
 
                 if (
                   lovedPlaylist.musics.find(music => music.url === track?.url)
                 ) {
-                  musicContext.removeMusicFromPlaylist(
+                  trackerContext.removeMusicFromPlaylist(
                     lovedPlaylist.name,
                     track as MusicProps,
                   );
@@ -323,7 +209,7 @@ export const PlayerPage = ({ navigation }: any) => {
                     `Música ${track?.title} removida de ${lovedPlaylist.name}`,
                   );
                 } else {
-                  musicContext.addMusicToPlaylist(
+                  trackerContext.addMusicToPlaylist(
                     lovedPlaylist.name,
                     track as MusicProps,
                   );

@@ -22,14 +22,14 @@ import TrackPlayer, {
   useActiveTrack,
   usePlaybackState,
 } from 'react-native-track-player';
-import { MusicContext } from '../../contexts/music-player-context';
+import { TrackerContext } from '../../contexts/tracker-context';
 
 const Tab = createMaterialTopTabNavigator();
 
 export const SongPage = ({ navigation, route }: any) => {
   const { styles, theme } = useStyles(stylesheet);
   const [search, setSearch] = useState('');
-  const musicContext = useContext(MusicContext);
+  const musicContext = useContext(TrackerContext);
   const searchRef = useRef<TextInput | null>(null);
   const state = usePlaybackState();
   const track = useActiveTrack();

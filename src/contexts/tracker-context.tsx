@@ -8,9 +8,11 @@ import React, {
 import { MusicProps, musicScanner } from '../services/music-scanner-service';
 import { storage } from '../../App';
 
-export const MusicContext = createContext<TrackerProps | undefined>(undefined);
+export const TrackerContext = createContext<TrackerProps | undefined>(
+  undefined,
+);
 
-interface MusicPropsProvider {
+interface TrackerPropsProvider {
   children: ReactNode;
 }
 
@@ -24,15 +26,23 @@ interface TrackerProps {
   playlists: Map<string, PlaylistProps>;
   search?: string;
   loading: boolean;
+
   setSearch: (search: string) => void;
+
   createPlaylist: (playlistName: string) => Promise<PlaylistProps>;
+
   deletePlaylist: (playlistName: string) => Promise<void>;
+
   addMusicToPlaylist: (playlistName: string, music: MusicProps) => void;
+
   removeMusicFromPlaylist: (playlistName: string, music: MusicProps) => void;
+
   getLovedPlaylist: () => PlaylistProps | undefined;
+
+  loadMusics: () => Promise<MusicProps[]>;
 }
 
-const MusicProvider = ({ children }: MusicPropsProvider) => {
+const TrackerProvider = ({ children }: TrackerPropsProvider) => {
   const setSearch = (search: string) => {
     setTracker(prevState => ({
       ...prevState,
@@ -113,18 +123,6 @@ const MusicProvider = ({ children }: MusicPropsProvider) => {
     return tracker.playlists.get('loved');
   };
 
-  const [tracker, setTracker] = useState<TrackerProps>({
-    musics: [],
-    playlists: new Map(),
-    loading: true,
-    setSearch,
-    createPlaylist,
-    deletePlaylist,
-    addMusicToPlaylist,
-    removeMusicFromPlaylist,
-    getLovedPlaylist,
-  });
-
   const loadMusics = useCallback(async (): Promise<MusicProps[]> => {
     const scannedMusics = await musicScanner();
     if (scannedMusics) {
@@ -138,6 +136,19 @@ const MusicProvider = ({ children }: MusicPropsProvider) => {
       return [];
     }
   }, []);
+
+  const [tracker, setTracker] = useState<TrackerProps>({
+    musics: [],
+    playlists: new Map(),
+    loading: true,
+    setSearch,
+    createPlaylist,
+    deletePlaylist,
+    addMusicToPlaylist,
+    removeMusicFromPlaylist,
+    getLovedPlaylist,
+    loadMusics,
+  });
 
   const loadPlaylists = () => {
     const lovedMusics: PlaylistProps = {
@@ -173,8 +184,10 @@ const MusicProvider = ({ children }: MusicPropsProvider) => {
   }, []);
 
   return (
-    <MusicContext.Provider value={tracker}>{children}</MusicContext.Provider>
+    <TrackerContext.Provider value={tracker}>
+      {children}
+    </TrackerContext.Provider>
   );
 };
 
-export default MusicProvider;
+export default TrackerProvider;

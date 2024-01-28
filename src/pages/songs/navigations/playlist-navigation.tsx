@@ -10,12 +10,12 @@ import {
 } from 'react-native';
 import { createStyleSheet, useStyles } from 'react-native-unistyles';
 import {
-  MusicContext,
+  TrackerContext,
   PlaylistProps,
-} from '../../../contexts/music-player-context';
+} from '../../../contexts/tracker-context';
 import { Playlist } from '../../../components/playlist';
 import { ListVideo, ListPlus, X, Trash2 } from 'lucide-react-native';
-import TrackPlayer, { useActiveTrack } from 'react-native-track-player';
+import TrackPlayer from 'react-native-track-player';
 import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { Song } from '../../../components/song';
 import { storage } from '../../../../App';
@@ -26,8 +26,7 @@ export const PlaylistNavigation = () => {
   const [selectPlaylist, setSelectPlaylist] = useState<PlaylistProps>();
 
   const { styles, theme } = useStyles(stylesheet);
-  const musicContext = useContext(MusicContext);
-  const track = useActiveTrack();
+  const musicContext = useContext(TrackerContext);
 
   const [deletePlaylist, setDeletePlaylist] = useState<{
     [key: string]: boolean;
@@ -141,19 +140,15 @@ export const PlaylistNavigation = () => {
                   style={styles.playlistCardButton}
                   onPress={() => {
                     if (value.musics.length) {
-                      storage.set(
-                        'shuffle.defaultQueue',
-                        JSON.stringify(
-                          value.musics.filter(
-                            active => active.url !== track?.url,
-                          ),
-                        ),
-                      );
-
                       TrackPlayer.setQueue(value.musics).then(() =>
-                        TrackPlayer.play().then(() =>
-                          toast(`Tocando a playlist ${value.name}.`),
-                        ),
+                        TrackPlayer.play().then(() => {
+                          storage.set(
+                            'shuffle.defaultQueue',
+                            JSON.stringify(value.musics),
+                          );
+
+                          toast(`Tocando a playlist ${value.name}.`);
+                        }),
                       );
                     } else {
                       toast('Esta playlist está vazia.');
@@ -183,9 +178,14 @@ export const PlaylistNavigation = () => {
               <Song.Root
                 key={index}
                 onClick={() => {
-                  TrackPlayer.setQueue(selectPlaylist.musics).then(() =>
-                    TrackPlayer.skip(index).then(() => TrackPlayer.play()),
-                  );
+                  TrackPlayer.setQueue(selectPlaylist.musics).then(() => {
+                    storage.set(
+                      'shuffle.defaultQueue',
+                      JSON.stringify(selectPlaylist.musics),
+                    );
+
+                    TrackPlayer.skip(index).then(() => TrackPlayer.play());
+                  });
                 }}>
                 <Song.Image />
                 <Song.Details

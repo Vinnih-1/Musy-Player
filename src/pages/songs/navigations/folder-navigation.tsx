@@ -54,7 +54,7 @@ export const FolderNavigation = () => {
           <Text style={styles.typography}>{folder.name}</Text>
           {path === folder.path ? (
             <TouchableOpacity style={styles.buttonSelected} activeOpacity={1}>
-              <Text>Selecionado</Text>
+              <Text style={styles.typography}>Selecionado</Text>
             </TouchableOpacity>
           ) : (
             <TouchableOpacity
@@ -64,7 +64,7 @@ export const FolderNavigation = () => {
                 setPath(folder.path);
                 trackerContext.setMusicPath(folder.path);
               }}>
-              <Text>Selecionar</Text>
+              <Text style={styles.typography}>Selecionar</Text>
             </TouchableOpacity>
           )}
         </View>

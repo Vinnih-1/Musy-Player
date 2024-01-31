@@ -8,19 +8,15 @@ export interface MusicProps {
   url: string;
 }
 
-export const musicScanner = async (): Promise<MusicProps[] | undefined> => {
-  const paths = await RNFS.readDir(RNFS.ExternalStorageDirectoryPath);
-  const musicPath = paths.find(path => path.name === 'Music');
+export const musicScanner = async (
+  path: string,
+): Promise<MusicProps[] | undefined> => {
   const match = minimatch.filter('*.{mp3,flac}', { matchBase: true });
   const musics: MusicProps[] = [];
 
-  if (!musicPath) {
-    throw new Error('Default music folder could not be found!');
-  }
-
   try {
     const loadedMusics = await (
-      await RNFS.readDir(musicPath.path)
+      await RNFS.readDir(path)
     )
       .filter(file => file.isFile)
       .filter(file => match(file.name))

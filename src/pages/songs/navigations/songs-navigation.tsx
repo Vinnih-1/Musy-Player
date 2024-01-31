@@ -34,7 +34,7 @@ export const SongsNavigation = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState('');
 
-  const musicContext = useContext(TrackerContext);
+  const trackerContext = useContext(TrackerContext);
 
   const track = useActiveTrack();
 
@@ -43,8 +43,8 @@ export const SongsNavigation = () => {
 
   const filteredMusics =
     search === ''
-      ? musicContext?.musics
-      : musicContext?.musics.filter(music =>
+      ? trackerContext?.musics
+      : trackerContext?.musics.filter(music =>
           music.title.toLowerCase().includes(search),
         );
 
@@ -53,22 +53,26 @@ export const SongsNavigation = () => {
   };
 
   const onRefresh = useCallback(() => {
-    musicContext?.loadMusics().then(() => setRefreshing(false));
-  }, [musicContext]);
+    const path = storage.getString('musicPath');
+
+    if (path) {
+      trackerContext?.loadMusics(path).then(() => setRefreshing(false));
+    }
+  }, [trackerContext]);
 
   useEffect(() => {
     setSearch(
-      musicContext && musicContext.search !== undefined
-        ? musicContext.search.toLowerCase()
+      trackerContext && trackerContext.search !== undefined
+        ? trackerContext.search.toLowerCase()
         : '',
     );
-  }, [musicContext, musicContext?.search]);
+  }, [trackerContext, trackerContext?.search]);
 
-  if (!musicContext) {
+  if (!trackerContext) {
     return null;
   }
 
-  if (musicContext.loading) {
+  if (trackerContext.loading) {
     return <View style={styles.loading} />;
   }
 
@@ -90,7 +94,7 @@ export const SongsNavigation = () => {
                     setSelectMusic(undefined);
                     return;
                   }
-                  const selected = musicContext.musics.findIndex(
+                  const selected = trackerContext.musics.findIndex(
                     select => select.url === music.url,
                   );
 
@@ -98,7 +102,7 @@ export const SongsNavigation = () => {
                     return;
                   }
 
-                  await TrackPlayer.setQueue(musicContext.musics).then(
+                  await TrackPlayer.setQueue(trackerContext.musics).then(
                     async () => {
                       const queue = await TrackPlayer.getQueue();
                       storage.set(
@@ -195,12 +199,12 @@ export const SongsNavigation = () => {
         handleIndicatorStyle={styles.sheetIndicatorStyle}
         index={-1}>
         <BottomSheetScrollView>
-          {Array.from(musicContext.playlists).map(([key, value]) => (
+          {Array.from(trackerContext.playlists).map(([key, value]) => (
             <Playlist.Root
               key={key}
               onClick={() => {
                 if (selectMusic) {
-                  musicContext.addMusicToPlaylist(value.name, selectMusic);
+                  trackerContext.addMusicToPlaylist(value.name, selectMusic);
                   toast(
                     `A música ${selectMusic.title} foi adicionada a playlist ${value.name}`,
                   );

@@ -16,7 +16,7 @@ https://github.com/Vinnih-1/Musy-Player/assets/59892753/13f34c9c-987f-4d32-a65e-
 | Playlist page   | page containing all playlist created by user|  ✅  |
 | Artists page    | page containing all artists                 |  ❌  |
 | Albums page     | page containing all albums                  |  ❌  |
-| Folder page     | folder path where app will scan all songs   |  ❌  |
+| Folder page     | folder path where app will scan all songs   |  ✅  |
 | Downloader page | download a song just with youtube video url |  ❌  |
 
 # Libraries

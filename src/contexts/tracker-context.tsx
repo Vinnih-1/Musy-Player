@@ -1,10 +1,4 @@
-import React, {
-  ReactNode,
-  createContext,
-  useCallback,
-  useEffect,
-  useState,
-} from 'react';
+import React, { ReactNode, createContext, useEffect, useState } from 'react';
 import { MusicProps, musicScanner } from '../services/music-scanner-service';
 import { storage } from '../../App';
 
@@ -29,6 +23,8 @@ interface TrackerProps {
 
   setSearch: (search: string) => void;
 
+  setMusicPath: (path: string) => void;
+
   createPlaylist: (playlistName: string) => Promise<PlaylistProps>;
 
   deletePlaylist: (playlistName: string) => Promise<void>;
@@ -39,7 +35,7 @@ interface TrackerProps {
 
   getLovedPlaylist: () => PlaylistProps | undefined;
 
-  loadMusics: () => Promise<MusicProps[]>;
+  loadMusics: (path: string) => Promise<MusicProps[]>;
 }
 
 const TrackerProvider = ({ children }: TrackerPropsProvider) => {
@@ -123,19 +119,35 @@ const TrackerProvider = ({ children }: TrackerPropsProvider) => {
     return tracker.playlists.get('loved');
   };
 
-  const loadMusics = useCallback(async (): Promise<MusicProps[]> => {
-    const scannedMusics = await musicScanner();
-    if (scannedMusics) {
-      setTracker(prevState => ({
-        ...prevState,
-        musics: scannedMusics,
-        loading: false,
-      }));
-      return scannedMusics;
+  const loadMusics = async (): Promise<MusicProps[]> => {
+    setTracker(prevState => ({
+      ...prevState,
+      musics: [],
+    }));
+
+    const path = getPath();
+
+    if (path) {
+      const scannedMusics = await musicScanner(path);
+
+      if (scannedMusics) {
+        setTracker(prevState => ({
+          ...prevState,
+          musics: scannedMusics,
+          loading: false,
+        }));
+        return scannedMusics;
+      } else {
+        return [];
+      }
     } else {
       return [];
     }
-  }, []);
+  };
+
+  const setMusicPath = (path: string) => {
+    storage.set('musicPath', path);
+  };
 
   const [tracker, setTracker] = useState<TrackerProps>({
     musics: [],
@@ -148,6 +160,7 @@ const TrackerProvider = ({ children }: TrackerPropsProvider) => {
     removeMusicFromPlaylist,
     getLovedPlaylist,
     loadMusics,
+    setMusicPath,
   });
 
   const loadPlaylists = () => {
@@ -176,9 +189,17 @@ const TrackerProvider = ({ children }: TrackerPropsProvider) => {
     }
   };
 
+  const getPath = () => {
+    return storage.getString('musicPath');
+  };
+
   useEffect(() => {
-    loadMusics();
-    loadPlaylists();
+    if (!getPath()) {
+      storage.set('musicPath', '/storage/emulated/0/Music');
+    } else {
+      loadMusics();
+      loadPlaylists();
+    }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

@@ -96,9 +96,10 @@ export const PlayerProvider = ({ children }: PlayerProviderProps) => {
   };
 
   const updateRepeatMode = () => {
-    TrackPlayer.setRepeatMode(getRepeatModeByIndex(repeatMode().valueOf() + 1));
+    const mode = getRepeatModeByIndex(repeatMode().valueOf() + 1);
 
-    storage.set('repeatMode', repeatMode().valueOf());
+    TrackPlayer.setRepeatMode(mode);
+    storage.set('repeatMode', mode.valueOf());
   };
 
   return (

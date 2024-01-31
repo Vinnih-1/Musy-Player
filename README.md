@@ -30,6 +30,10 @@ https://github.com/Vinnih-1/Musy-Player/assets/59892753/d1cdbdfc-fd2a-4ca5-96cb-
 - [ffmpeg-kit-react-native](https://github.com/arthenica/ffmpeg-kit)
 - [react-native-slider](https://github.com/callstack/react-native-slider)
 - [minimatch](https://github.com/isaacs/minimatch)
+- [react-navigation](https://reactnavigation.org/docs/getting-started/)
+- [react-native-gesture-handler](https://docs.swmansion.com/react-native-gesture-handler/docs/)
+- [react-native-mmkv](https://github.com/mrousavy/react-native-mmkv)
+- [react-native-reanimated](https://docs.swmansion.com/react-native-reanimated/docs/fundamentals/getting-started/)
 
 # Design credits
 

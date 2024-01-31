@@ -196,10 +196,9 @@ const TrackerProvider = ({ children }: TrackerPropsProvider) => {
   useEffect(() => {
     if (!getPath()) {
       storage.set('musicPath', '/storage/emulated/0/Music');
-    } else {
-      loadMusics();
-      loadPlaylists();
     }
+    loadMusics();
+    loadPlaylists();
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

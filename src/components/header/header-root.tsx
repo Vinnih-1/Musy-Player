@@ -20,5 +20,6 @@ const stylesheet = createStyleSheet(theme => ({
     justifyContent: 'space-between',
     backgroundColor: theme.colors.background,
     height: 78,
+    paddingHorizontal: 12,
   },
 }));

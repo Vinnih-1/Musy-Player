@@ -1,22 +1,17 @@
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import React, { useState } from 'react';
-import {
-  PermissionsAndroid,
-  SafeAreaView,
-  Text,
-  TouchableOpacity,
-  DeviceEventEmitter,
-} from 'react-native';
-import { createStyleSheet, useStyles } from 'react-native-unistyles';
+import { PermissionsAndroid, DeviceEventEmitter } from 'react-native';
+import { useStyles } from 'react-native-unistyles';
 import { SongPage } from '../songs';
 import { PlayerPage } from '../player';
 import TrackerProvider from '../../contexts/tracker-context.tsx';
 import { PlayerProvider } from '../../contexts/player-context.tsx';
+import { PermissionPage } from '../permission/index.tsx';
 
 const Drawer = createDrawerNavigator();
 
 export const Home = () => {
-  const { styles, theme } = useStyles(stylesheet);
+  const { theme } = useStyles();
   const [permissionGranted, setPermissionGranted] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -39,35 +34,12 @@ export const Home = () => {
     }
   });
 
-  const handlePermissionsRequest = () => {
-    PermissionsAndroid.requestMultiple([
-      READ_EXTERNAL_STORAGE,
-      WRITE_EXTERNAL_STORAGE,
-    ]).then(result => {
-      console.log(result);
-      if (result[READ_EXTERNAL_STORAGE] && result[WRITE_EXTERNAL_STORAGE]) {
-        setPermissionGranted(true);
-      }
-    });
-  };
-
   if (loading) {
     return null;
   }
 
   if (!permissionGranted) {
-    return (
-      <SafeAreaView style={styles.permissionScreen}>
-        <TouchableOpacity
-          style={styles.permissionButton}
-          activeOpacity={0.8}
-          onPress={() => {
-            handlePermissionsRequest();
-          }}>
-          <Text style={styles.typrography}>Allow Access</Text>
-        </TouchableOpacity>
-      </SafeAreaView>
-    );
+    return <PermissionPage setPermissionGranted={setPermissionGranted} />;
   }
 
   return (
@@ -102,21 +74,3 @@ export const Home = () => {
     </TrackerProvider>
   );
 };
-
-const stylesheet = createStyleSheet(theme => ({
-  permissionScreen: {
-    flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: theme.colors.background,
-  },
-  permissionButton: {
-    backgroundColor: theme.colors.primary,
-    padding: 20,
-    borderRadius: 20,
-  },
-  typrography: {
-    color: theme.colors.white,
-  },
-}));

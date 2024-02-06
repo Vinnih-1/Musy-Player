@@ -60,7 +60,6 @@ export const SongPage = ({ navigation, route }: any) => {
       <Header.Root>
         <Header.Container style={styles.container}>
           <Header.Button
-            style={styles.items}
             onClick={() => {
               navigation.dispatch(DrawerActions.openDrawer());
             }}>
@@ -78,7 +77,6 @@ export const SongPage = ({ navigation, route }: any) => {
           }}
         />
         <Header.Button
-          style={styles.items}
           onClick={() => {
             if (searchRef.current) {
               if (!searchRef.current.isFocused()) {

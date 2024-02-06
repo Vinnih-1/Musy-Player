@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import { TextInput } from 'react-native';
+import { TextInput, View } from 'react-native';
 import { Header } from '../../components/header';
 import {
   AlignLeft,
@@ -21,16 +21,21 @@ import { DrawerActions } from '@react-navigation/native';
 import TrackPlayer, {
   useActiveTrack,
   usePlaybackState,
+  useProgress,
 } from 'react-native-track-player';
 import { TrackerContext } from '../../contexts/tracker-context';
+import * as Progress from 'react-native-progress';
 
 const Tab = createMaterialTopTabNavigator();
 
 export const SongPage = ({ navigation, route }: any) => {
   const { styles, theme } = useStyles(stylesheet);
-  const [search, setSearch] = useState('');
+
   const musicContext = useContext(TrackerContext);
   const searchRef = useRef<TextInput | null>(null);
+  const [search, setSearch] = useState('');
+
+  const { position, duration } = useProgress();
   const state = usePlaybackState();
   const track = useActiveTrack();
 
@@ -135,33 +140,42 @@ export const SongPage = ({ navigation, route }: any) => {
               url={track.url}
             />
           </Bottom.Container>
-          <Bottom.Container style={styles.bottomButtonContainer}>
-            <Bottom.Button
-              onClick={() => {
-                TrackPlayer.skipToPrevious();
-              }}>
-              <SkipBack strokeWidth={5} size={25} color={'#FFF'} />
-            </Bottom.Button>
-            <Bottom.Button
-              onClick={() => {
-                switch (state.state) {
-                  case 'playing':
-                    TrackPlayer.pause();
-                    break;
-                  case 'paused':
-                    TrackPlayer.play();
-                    break;
-                }
-              }}>
-              {getPlaybackButton()}
-            </Bottom.Button>
-            <Bottom.Button
-              onClick={() => {
-                TrackPlayer.skipToNext();
-              }}>
-              <SkipForward strokeWidth={5} size={25} color={'#FFF'} />
-            </Bottom.Button>
-          </Bottom.Container>
+          <View style={styles.bottomButtonContent}>
+            <Bottom.Container style={styles.bottomButtonContainer}>
+              <Bottom.Button
+                onClick={() => {
+                  TrackPlayer.skipToPrevious();
+                }}>
+                <SkipBack strokeWidth={5} size={25} color={'#FFF'} />
+              </Bottom.Button>
+              <Bottom.Button
+                onClick={() => {
+                  switch (state.state) {
+                    case 'playing':
+                      TrackPlayer.pause();
+                      break;
+                    case 'paused':
+                      TrackPlayer.play();
+                      break;
+                  }
+                }}>
+                {getPlaybackButton()}
+              </Bottom.Button>
+              <Bottom.Button
+                onClick={() => {
+                  TrackPlayer.skipToNext();
+                }}>
+                <SkipForward strokeWidth={5} size={25} color={'#FFF'} />
+              </Bottom.Button>
+            </Bottom.Container>
+            <Progress.Bar
+              progress={position && duration ? position / duration : 0}
+              height={4}
+              borderWidth={0}
+              width={null}
+              color={theme.colors.white}
+            />
+          </View>
         </Bottom.Root>
       )}
     </>
@@ -183,31 +197,16 @@ const stylesheet = createStyleSheet(theme => ({
     color: theme.colors.white,
     fontSize: theme.fontSize.xs,
   },
-  permissionScreen: {
-    flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: theme.colors.background,
-  },
-  permissionButton: {
-    backgroundColor: theme.colors.primary,
-    padding: 20,
-    borderRadius: 20,
-  },
-  warnScreen: {
-    alignItems: 'center',
-    marginTop: 70,
-    gap: 80,
-  },
   typrography: {
     color: theme.colors.white,
   },
-  items: {
-    marginHorizontal: 20,
-  },
   bottomButtonContainer: {
-    maxWidth: '30%',
     justifyContent: 'space-around',
+    maxHeight: 32,
+  },
+  bottomButtonContent: {
+    maxWidth: '30%',
+    flexDirection: 'column',
+    gap: 12,
   },
 }));

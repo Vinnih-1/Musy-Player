@@ -28,5 +28,6 @@ const stylesheet = createStyleSheet(theme => ({
     alignItems: 'center',
     backgroundColor: theme.colors.bottom,
     gap: 20,
+    paddingHorizontal: 12,
   },
 }));

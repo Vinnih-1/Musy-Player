@@ -4,22 +4,6 @@ My music app created with React Native (without Expo). This app is being created
 # Current state
 https://github.com/Vinnih-1/Musy-Player/assets/59892753/d1cdbdfc-fd2a-4ca5-96cb-d58a5f061d76
 
-
-# TO DO
-
-| Task          | Description                                   | Done |
-|---------------|-----------------------------------------------|------|
-| Mute button     | mute and unmute at the Player page          |  ✅  |
-| Queue button    | open bottom sheet that contains queue musics|  ✅  |
-| Shuffle button  | shuffle queue musics                        |  ✅  |
-| Repeat button   | set repeat mode (OFF, TRACK and QUEUE)      |  ✅  |
-| Like button     | save current song in a liked playlist       |  ✅  |
-| Playlist page   | page containing all playlist created by user|  ✅  |
-| Artists page    | page containing all artists                 |  ❌  |
-| Albums page     | page containing all albums                  |  ❌  |
-| Folder page     | folder path where app will scan all songs   |  ✅  |
-| Downloader page | download a song just with youtube video url |  ❌  |
-
 # Libraries
 
 - [react-native-unistyles](https://github.com/jpudysz/react-native-unistyles)
@@ -34,6 +18,7 @@ https://github.com/Vinnih-1/Musy-Player/assets/59892753/d1cdbdfc-fd2a-4ca5-96cb-
 - [react-native-gesture-handler](https://docs.swmansion.com/react-native-gesture-handler/docs/)
 - [react-native-mmkv](https://github.com/mrousavy/react-native-mmkv)
 - [react-native-reanimated](https://docs.swmansion.com/react-native-reanimated/docs/fundamentals/getting-started/)
+- [react-native-progress](https://github.com/oblador/react-native-progress)
 
 # Design credits
 
